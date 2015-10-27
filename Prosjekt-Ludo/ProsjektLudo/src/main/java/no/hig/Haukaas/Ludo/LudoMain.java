@@ -10,7 +10,7 @@ public class LudoMain {
 	        
 	        if (args.length == 0) {
 	        	//client = new LoginClient("127.0.0.1");	//Localhost
-	        	client = new LoginClient("128.39.168.159");	//Min IP
+	        	client = new LoginClient("128.39.83.101");	//Min IP
 	        }
 	        else
 	        	client = new LoginClient(args[0]);	//use args

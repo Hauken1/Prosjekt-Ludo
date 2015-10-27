@@ -49,8 +49,7 @@ public class LudoClient extends JFrame implements Runnable {
 		//panel.add(boardPanel, BorderLayout.CENTER); 
 	
 		setSize(500, 300);
-		setVisible(true);
-		
+		setVisible(true);		
 	}
 	
 	public void run() {
