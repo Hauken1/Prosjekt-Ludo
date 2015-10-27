@@ -4,7 +4,6 @@ public class LudoMain {
 
 	  public static void main( String[] args )
 	    {
-	        GlobalServer application = new GlobalServer();
-	        application.execute();
+	        System.out.println("Hello world");
 	    }
 }

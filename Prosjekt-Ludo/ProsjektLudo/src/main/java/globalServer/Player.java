@@ -1,4 +1,4 @@
-package no.hig.Haukaas.Ludo;
+package globalServer;
 
 import java.io.IOException;
 import java.net.Socket;
