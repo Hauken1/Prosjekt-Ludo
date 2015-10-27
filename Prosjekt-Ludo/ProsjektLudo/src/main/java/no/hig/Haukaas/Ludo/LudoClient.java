@@ -23,22 +23,22 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
-/*Vet ikke helt om jeg skal gjøre det slik jeg har det nå. Dvs har en "client" for pålogging
-*og en for selve spillet. Ville prøve å gjøre det på denne måten, men vet ikke helt hvordan det blir med connectionen  
-*/
-
 public class LudoClient extends JFrame implements Runnable {
 	private String ludoClientHost; //host name for server
 	private JTextArea displayArea; //Displays chat/messages from the server
-	
+	private JPanel kommunikasjon;
+	private JPanel spillBord;
 	
 	public LudoClient(String host, Socket socket) {
-		super("Here we go!");
-		ludoClientHost = host; 
+		super("Ludo Klient");
+		ludoClientHost = host;
+		
+		//spillBord = new JPanel();
+		//kommunikasjon = new JPanel();
 		
 		displayArea = new JTextArea(4, 30);
-		displayArea.setEditable(false);
-		add(new JScrollPane(displayArea));
+		displayArea.setEditable(true);
+		add(new JScrollPane(displayArea), BorderLayout.SOUTH);
 		
 		//boardPanel = new JPanel(); //Kan brukes for å vise spillet
 		//boardPanel.setLayout(new GridLayout(3,3,0,0));	//Setter hvordan panelet skal se ut
@@ -47,7 +47,8 @@ public class LudoClient extends JFrame implements Runnable {
 		//idField.setEditable(false);
 		//add(idField, BorderLayout.NORTH);		
 		//panel.add(boardPanel, BorderLayout.CENTER); 
-	
+		//add(kommunikasjon);
+		
 		setSize(500, 300);
 		setVisible(true);		
 	}
