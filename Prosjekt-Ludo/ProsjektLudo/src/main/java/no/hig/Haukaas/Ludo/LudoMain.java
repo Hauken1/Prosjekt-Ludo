@@ -6,6 +6,7 @@ public class LudoMain {
 
 	  public static void main( String[] args )
 	    {
+		  	new DatabaseTest(); 
 	        LoginClient client; 
 	        
 	        if (args.length == 0) {
