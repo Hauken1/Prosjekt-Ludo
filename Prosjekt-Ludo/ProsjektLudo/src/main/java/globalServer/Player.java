@@ -22,6 +22,7 @@ public class Player implements Runnable {
 			output = new Formatter(connection.getOutputStream());
 		} catch (IOException ioE) {
 			ioE.printStackTrace();
+			
 		}
 		
 	}
@@ -33,6 +34,15 @@ public class Player implements Runnable {
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
+		try {
+			
+		} finally {
+			try {
+				connection.close();
+			} catch (IOException ioE) {
+				ioE.printStackTrace();
+			}
+		}
 		
 	}
 	
