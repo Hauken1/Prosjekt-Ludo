@@ -156,13 +156,12 @@ public class LoginClient extends JFrame implements Runnable {
 		try {	//connect to server and get streams
 			//Make a connection to server
 		
-			connection = new Socket(InetAddress.getByName(LudoClienthost),12345);
+			connection = new Socket(InetAddress.getByName(LudoClienthost),12347);
 			displayArea.append("Online");
 			
 			//get streams for input and output
 			input = new Scanner(connection.getInputStream());
 			output = new Formatter(connection.getOutputStream());
-			
 			
 		}
 		catch (IOException ioE) {
