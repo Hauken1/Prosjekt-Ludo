@@ -35,10 +35,11 @@ public class Player implements Runnable {
 	public void run() {
 		// TODO Auto-generated method stub
 		try {
-			
+						
 		} finally {
 			try {
 				connection.close();
+				System.out.println("Connection closed");
 			} catch (IOException ioE) {
 				ioE.printStackTrace();
 			}
