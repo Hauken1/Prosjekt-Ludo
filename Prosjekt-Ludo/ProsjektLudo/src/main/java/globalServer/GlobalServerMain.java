@@ -8,6 +8,5 @@ public class GlobalServerMain {
 	    {
 	        GlobalServer application = new GlobalServer();
 	        application.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	        application.execute();
 	    }
 }
