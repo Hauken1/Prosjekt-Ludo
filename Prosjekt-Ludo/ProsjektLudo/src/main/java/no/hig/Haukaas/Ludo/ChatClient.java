@@ -99,7 +99,7 @@ public class ChatClient extends JFrame {
      */
     public void connect() {
         try {
-            connection = new Socket("localhost", 12345);
+            connection = new Socket("localhost", 12347);
             output = new BufferedWriter(new OutputStreamWriter(
                     connection.getOutputStream()));
             input = new BufferedReader(new InputStreamReader(
