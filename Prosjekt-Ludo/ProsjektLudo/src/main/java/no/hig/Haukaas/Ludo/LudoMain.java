@@ -2,11 +2,14 @@ package no.hig.Haukaas.Ludo;
 
 import javax.swing.JFrame;
 
+import globalServer.DatabaseHandler;
+
 public class LudoMain {
 
 	  public static void main( String[] args )
 	    {
-		  	//new DatabaseTest(); 
+
+		 	new DatabaseHandler(); 
 	        LoginClient client; 
 	        
 	        if (args.length == 0) {
