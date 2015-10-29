@@ -48,6 +48,13 @@ public class LudoClient extends JFrame implements Runnable {
 		displayArea.setEditable(true);
 		add(new JScrollPane(displayArea), BorderLayout.SOUTH);
 		
+		try {	//Prøver å lage spill bordet
+			LudoBoard board = new LudoBoard();
+			add(board, BorderLayout.CENTER);
+		} catch (Exception e) {
+			System.out.println("Noe feil med brettet");
+		}
+		
 		//boardPanel = new JPanel(); //Kan brukes for å vise spillet
 		//boardPanel.setLayout(new GridLayout(3,3,0,0));	//Setter hvordan panelet skal se ut
 			
@@ -57,7 +64,7 @@ public class LudoClient extends JFrame implements Runnable {
 		//panel.add(boardPanel, BorderLayout.CENTER); 
 		//add(kommunikasjon);
 		
-		setSize(500, 300);
+		setSize(1000, 1000);
 		setVisible(true);		
 	}
 	
@@ -65,5 +72,4 @@ public class LudoClient extends JFrame implements Runnable {
 		// TODO Auto-generated method stub
 		
 	}
-
 }

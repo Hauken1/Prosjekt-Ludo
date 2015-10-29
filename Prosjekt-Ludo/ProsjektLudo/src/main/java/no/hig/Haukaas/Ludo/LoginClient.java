@@ -126,7 +126,11 @@ public class LoginClient extends JFrame implements Runnable {
 		// TODO Auto-generated method stub
 		
 	}
-	
+	/**
+	 * Method that contains most of the functionality of the ActionListener of LoginButton.
+	 * Sends the text that is in the JTextField of the GUI to the server, and tries to
+	 * log in. If accepted, the user will be brought to a new client
+	 */
 	public void doLoginButtonListener() {
 		String textUsername = userType.getText();
 		String textPassword = passType.getText();
@@ -147,10 +151,15 @@ public class LoginClient extends JFrame implements Runnable {
 				else JOptionPane.showMessageDialog(null, "Wrong username or password. Please try again");
 			}
 		} catch (Exception e) {
-			 System.out.println( "Could not get acces to server" );
+			JOptionPane.showMessageDialog(null, "Check connection to server.");
+			System.out.println( "Could not get acces to server" );
 		}
 	}
-	
+	/**
+	 * Method that contains most of the functionality of the ActionListener of RegisterButton
+	 * Makes a JOptionpane where the user can type in their username and password, and then
+	 * sends it to the server and database.  
+	 */
 	public void doRegisterButtonListener() {
 		int answer;
 		
@@ -175,7 +184,7 @@ public class LoginClient extends JFrame implements Runnable {
 					JOptionPane.showMessageDialog(null, "Account created. Login to play Ludo");
 				else System.out.println("Error");		
 			} catch (Exception e1) {
-						JOptionPane.showMessageDialog(null, "Something went wrong. Please try again");
+						JOptionPane.showMessageDialog(null, "Something went wrong. Check connection to server and try again");
 			}
 		}
 	}
