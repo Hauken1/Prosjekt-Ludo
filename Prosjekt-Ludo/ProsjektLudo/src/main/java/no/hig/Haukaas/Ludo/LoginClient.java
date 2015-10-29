@@ -27,8 +27,6 @@ import javax.swing.SwingUtilities;
 public class LoginClient extends JFrame implements Runnable {
 	private String LudoClienthost; //host name for server
 	private JTextArea displayArea; 
-	private JTextField idField;
-	private JPanel boardPanel;
 	private JPanel panel; 
 	private JLabel userName;
 	private JLabel passWord; 
@@ -39,8 +37,13 @@ public class LoginClient extends JFrame implements Runnable {
 	private Socket connection; //connection to server
 	private Scanner input; //input from server
 	private Formatter output; //output to server
-	private boolean test;
 	
+	/**
+	 * Constructor for the login Client. Makes necessary objects/elements
+	 * to be able to login and register.
+	 * Starts the connection with the server.
+	 * @param host contains the IP for the server
+	 */
 	public LoginClient(String host) {
 		super("Ludo Login");
 		LudoClienthost = host; 
@@ -79,57 +82,14 @@ public class LoginClient extends JFrame implements Runnable {
 		ActionListener loginButtonListener = new ActionListener() {
 		
 			public void actionPerformed(ActionEvent event) {
-				String textUsername = userType.getText();
-				String textPassword = passType.getText();
-				
-				try {
-					sendUserPassLogin(textUsername, textPassword);
-					//Når en connection er established ser server etter to strenger. Passord og brukernavn
-					if(input.hasNextLine()){
-						if (processLogin(input.nextLine()) ) {	//Logger inn, dvs lager spill klient
-							setVisible(false);
-							LudoClient client;
-							client = new LudoClient(LudoClienthost, connection);
-							client.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-						}
-					
-					}
-				} catch (Exception e) {
-					 System.out.println( "Could not get acces to server" );
-				}
+				doLoginButtonListener();
 			}		
 		}; 
 		loginButton.addActionListener(loginButtonListener);
 		
 		ActionListener registerButtonListener = new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
-				int answer;
-				
-				JTextField user = new JTextField();
-				JTextField pass = new JTextField();
-				
-				JPanel editorPanel = new JPanel();
-				editorPanel.add(new JLabel("Username:"));
-				editorPanel.add(user);
-				editorPanel.add(new JLabel("Password"));
-				editorPanel.add(pass);
-				editorPanel.setLayout(new BoxLayout(editorPanel, BoxLayout.Y_AXIS));
-					
-				answer = JOptionPane.showConfirmDialog(null, editorPanel, "Chose your Username and Password", JOptionPane.OK_CANCEL_OPTION);
-					
-				if (answer == JOptionPane.OK_OPTION) {
-  					String textUsername = user.getText();
-  					String textPassword = pass.getText();
-  					
-  					try {
-  						sendUserPassRegister(textUsername, textPassword);
-  						if(processLogin(input.nextLine()))
-  							JOptionPane.showMessageDialog(null, "Account created. Login to play Ludo");
-  						else System.out.println("Error");		
-  					} catch (Exception e1) {
-  							JOptionPane.showMessageDialog(null, "Something went wrong. Please try again");
-  					}
-				}
+				doRegisterButtonListener();
 			}
 		};
 		registerButton.addActionListener(registerButtonListener);
@@ -140,18 +100,17 @@ public class LoginClient extends JFrame implements Runnable {
 		setVisible(true);
 		startClient();
 	}
-	
+	/**
+	 * Starts the connection with the server with the given IP and Port.
+	 */
 	public void startClient() {
 		try {	//connect to server and get streams
 			//Make a connection to server
-		
 			connection = new Socket(InetAddress.getByName(LudoClienthost),12347);
 			displayArea.append("Online");
-			
 			//get streams for input and output
 			input = new Scanner(connection.getInputStream());
-			output = new Formatter(connection.getOutputStream());
-			
+			output = new Formatter(connection.getOutputStream());	
 		}
 		catch (IOException ioE) {
 			System.out.println("Cant connect to server");
@@ -168,28 +127,92 @@ public class LoginClient extends JFrame implements Runnable {
 		
 	}
 	
-	public void sendUserPassLogin (String username, String password) {	//Sender dette til server. server sjekker med database og hvis det ikke fines lages en ny bruker
-		boolean test;
+	public void doLoginButtonListener() {
+		String textUsername = userType.getText();
+		String textPassword = passType.getText();
+		try {
+			/*Sender beskjed til serveren at det er en login, deretter 
+			 * sendes brukernavn og passord. 
+			 */
+			sendUserPassLogin(textUsername, textPassword);
+			//Får svar fra server
+			if(input.hasNextLine()){
+				int n = input.nextInt();
+				if (n > 0) {	//Logger inn, dvs lager spill klient
+					setVisible(false);
+					LudoClient client;
+					client = new LudoClient(LudoClienthost, connection, n);
+					client.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				} 
+				else JOptionPane.showMessageDialog(null, "Wrong username or password. Please try again");
+			}
+		} catch (Exception e) {
+			 System.out.println( "Could not get acces to server" );
+		}
+	}
+	
+	public void doRegisterButtonListener() {
+		int answer;
+		
+		JTextField user = new JTextField();
+		JTextField pass = new JTextField();
+		
+		JPanel editorPanel = new JPanel();
+		editorPanel.add(new JLabel("Username:"));
+		editorPanel.add(user);
+		editorPanel.add(new JLabel("Password"));
+		editorPanel.add(pass);
+		editorPanel.setLayout(new BoxLayout(editorPanel, BoxLayout.Y_AXIS));
+			
+		answer = JOptionPane.showConfirmDialog(null, editorPanel, "Chose your Username and Password", JOptionPane.OK_CANCEL_OPTION);
+			
+		if (answer == JOptionPane.OK_OPTION) {
+			String textUsername = user.getText();
+			String textPassword = pass.getText();
+			try {
+				sendUserPassRegister(textUsername, textPassword);
+				if(processLogin(input.nextLine()))
+					JOptionPane.showMessageDialog(null, "Account created. Login to play Ludo");
+				else System.out.println("Error");		
+			} catch (Exception e1) {
+						JOptionPane.showMessageDialog(null, "Something went wrong. Please try again");
+			}
+		}
+	}
+	
+	/**
+	 * Sends a message to let the server know that it is a login.
+	 * Also sends the username and password that the user typed in.
+	 * @param username the users login name used for login
+	 * @param password the users password used for login
+	 */
+	public void sendUserPassLogin (String username, String password) {	
 		output.format("%s\n", "LOGIN");
-		//output.format("%s\n%s\n", username, password);
+		output.format("%s\n%s\n", username, password);
 		output.flush();
 	}
-	
-	public void sendUserPassRegister (String username, String password) {	//Sender dette til server. server sjekker med database og hvis det ikke fines lages en ny bruker
-		boolean test;
+	/**
+	 * Sends a message to let the server know that it is a registration,
+	 * also sends the username and password for the new user.
+	 * @param username the users login name for registration
+	 * @param password the users password for registration
+	 */
+	public void sendUserPassRegister (String username, String password) {	
 		output.format("%s\n", "REGISTER");
-	//	output.format("%s\n%s\n", username, password);
+		output.format("%s\n%s\n", username, password);
 		output.flush();
 	}
 	
-	//Process login messages received by client
+	/**
+	 * Process messages received by the client for registration
+	 * @param login String containing message from the server
+	 * @return return true if the registration process is successful, if not return false. 
+	 */
 	private boolean processLogin(String login) {
-		if (login.equals("CONNECTED")) return true;
-		else if (login.equals("ACCEPTED")) return true;
+		if (login.equals("ACCEPTED")) return true;
 		else {
-			JOptionPane.showMessageDialog(null, "Wrong Password or Username. Please try again");
+			JOptionPane.showMessageDialog(null, "User already exists. Please try again");
 			return false;
 		}
-		
 	}
 }

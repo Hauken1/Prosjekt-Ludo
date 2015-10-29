@@ -29,7 +29,15 @@ public class LudoClient extends JFrame implements Runnable {
 	private JPanel kommunikasjon;
 	private JPanel spillBord;
 	
-	public LudoClient(String host, Socket socket) {
+	/**
+	 * Constructor for the Ludo client. 
+	 * Makes a JFrame window where players can interact with each other and join games.
+	 * 
+	 * @param host	IP address of the server
+	 * @param socket	Connection to the server
+	 * @param spillerID	PlayerID retrived from the Database.
+	 */
+	public LudoClient(String host, Socket socket, int spillerID) {
 		super("Ludo Klient");
 		ludoClientHost = host;
 		
