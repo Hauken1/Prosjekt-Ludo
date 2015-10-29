@@ -21,7 +21,7 @@ public class DatabaseHandler {
 
 	private static Connection connection = null;
 	
-	private DatabaseHandler() {
+	public DatabaseHandler() {
 	}
 	/**
 	 * Method for connecting to an external database.
