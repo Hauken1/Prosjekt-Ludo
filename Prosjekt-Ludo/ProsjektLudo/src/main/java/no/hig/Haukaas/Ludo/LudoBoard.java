@@ -10,15 +10,12 @@ import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-/*Ser for meg at brettet skal være 15x15 (kan gjøres mindre da "hjemm-plassene", til de 
-*ulike fargene kan gjøres mindre. 
-*/
 /**
  * 
  * Class that makes the game board
  */
 public class LudoBoard extends JPanel {
-	private Color color[] = {Color.WHITE, Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.BLACK};
+	private Color color[] = {Color.WHITE, Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.BLACK, Color.ORANGE};
 	private final static int ROWS = 15;
 	private final static int COLUMNS = 15;
 	private Felter[][] felt;
@@ -79,7 +76,7 @@ public class LudoBoard extends JPanel {
 		 */
 		public void paintComponent(Graphics g) {
 			
-			if ( row < 6 & column >= 0 && column < 6) {
+			if ( row < 6 && column >= 0 && column < 6) {
 			super.paintComponent(g);
 			g.drawRect(0, 0, 145, 80);
 			g.setColor(color[1]);
@@ -90,20 +87,63 @@ public class LudoBoard extends JPanel {
 				g.setColor(color[2]);
 				g.fillRect(0, 0, 145, 80);
 			}
-			else if (row < 6 & column >= 9){
+			else if (row < 6 && column >= 9){
 				g.drawRect(0, 0, 145, 80);
 				g.setColor(color[3]);
 				g.fillRect(0, 0, 145, 80);
 			}
 			else if (row >= 9 && column >= 9){
 				g.drawRect(0, 0, 145, 80);
+				g.setColor(color[4]);
+				g.fillRect(0, 0, 145, 80);
+			}
+			else if(row >= 6 && row <=7  && column == 1 ) {
+				g.drawRect(0, 0, 145, 80);
+				g.setColor(color[1]);
+				g.fillRect(0, 0, 145, 80);
+				
+			}
+			else if(row == 1 && column  >= 7 && column <=8) {
+				g.drawRect(0, 0, 145, 80);
 				g.setColor(color[3]);
 				g.fillRect(0, 0, 145, 80);
 			}
-			
+			else if(row >= 7 && row <= 8 && column == 13) {
+				g.drawRect(0, 0, 145, 80);
+				g.setColor(color[4]);
+				g.fillRect(0, 0, 145, 80);
+			}
+			else if(row == 13 && column >= 6 && column <= 7) {
+				g.drawRect(0, 0, 145, 80);
+				g.setColor(color[2]);
+				g.fillRect(0, 0, 145, 80);
+			}
+			else if (column == 7 && row >= 9 && row <=13) {
+				g.drawRect(0, 0, 145, 80);
+				g.setColor(color[2]);
+				g.fillRect(0, 0, 145, 80);
+			}
+			else if (row == 7 && column >= 2 && column <= 5) {
+				g.drawRect(0, 0, 145, 80);
+				g.setColor(color[1]);
+				g.fillRect(0, 0, 145, 80);
+			}
+			else if (column == 7 && row >= 2 && row <=5) {
+				g.drawRect(0, 0, 145, 80);
+				g.setColor(color[3]);
+				g.fillRect(0, 0, 145, 80);
+			}
+			else if( row == 7 && column >= 9 && column <= 12) {
+				g.drawRect(0, 0, 145, 80);
+				g.setColor(color[4]);
+				g.fillRect(0, 0, 145, 80);
+			}
+			else if (row >= 6 && row <= 8 && column >= 6 && column <= 8){
+				g.drawRect(0, 0, 145, 80);
+				g.setColor(color[6]);
+				g.fillRect(0, 0, 145, 80);
+			}
 		}
-		
-		
 	}
 	
 }

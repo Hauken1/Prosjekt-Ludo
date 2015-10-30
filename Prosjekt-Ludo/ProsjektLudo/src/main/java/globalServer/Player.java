@@ -15,6 +15,7 @@ public class Player {
 	private BufferedWriter output;
 	
 	private String name;
+	private String password;
 
 	public Player(Socket connection) throws IOException {
 		this.connection = connection;
@@ -53,29 +54,37 @@ public class Player {
 			throw new IOException("No login/register received from client");
 		
 		if (username.startsWith("SENDLOGIN:") && pass.startsWith("SENDLOGIN:")) {
-			boolean login = true;	//må skiftes til false når databasen har funksjoner for login
+			int login = 0;
 			
 			name = username.substring(10);
-			
-		//	user = input.nextLine();
-		//	pw = input.nextLine();
-		// login = DatabaseTest.registerNewUser(user, pw);
-			if(login) {
-				output.write("CONNECTED");
+			password = pass.substring(10);
+						
+			login = DatabaseHandler.userLogin(name, password);
+			if(login > 0) {
+				output.write(login);
 				output.newLine();
 				output.flush();
-			}	
-		} 
+			}
+			else if (login == 0) {
+				output.write(login);
+				output.newLine();
+				output.flush();	
+			}
+		}
 		else if (username.startsWith("SENDREGISTER:") && pass.startsWith("SENDREGISTER:")){
-			boolean register = true; //må skiftes til false når databasen har funksjoner for registering.
+			boolean register = false; 
 			
 			name = username.substring(13);
-			
-			//user = input.nextLine();
-			//pw = input.nextLine();
-			//register = DatabaseTest.registerNewUser(user, pw);
+			password = pass.substring(13);
+			register = DatabaseHandler.registerNewUser(name, password);
+		
 			if (register) {
 				output.write("ACCEPTED");
+				output.newLine();
+				output.flush();
+			}
+			else {
+				output.write("DECLINED");
 				output.newLine();
 				output.flush();
 			}
@@ -107,18 +116,7 @@ public class Player {
 				}
 			} 
 			else if (loginregister.equals("REGISTER")){
-				boolean register = false;
-				user = input.nextLine();
-				pw = input.nextLine();
-				register = DatabaseHandler.registerNewUser(user, pw);
-				if (register) {
-					output.format("%s\n", "ACCEPTED");
-					output.flush();
-				}
-				else {
-					output.format("%s\n", "DECLINED");
-					output.flush();
-				}
+			
 			}
 			
 			}

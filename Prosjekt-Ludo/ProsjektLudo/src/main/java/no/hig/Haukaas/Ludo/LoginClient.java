@@ -43,7 +43,6 @@ public class LoginClient extends JFrame {
 	private Socket connection; //connection to server
 	private BufferedWriter output; //input from server
 	private BufferedReader input; //output to server
-	private boolean test;
 	
 	/**
 	 * Constructor for the login Client. Makes necessary objects/elements
@@ -54,57 +53,8 @@ public class LoginClient extends JFrame {
 	public LoginClient(String host) {
 		super("Ludo Login");
 		LudoClienthost = host; 
-		
-		panel = new JPanel(); 
-		panel.setLayout(null);
-		userName = new JLabel("User name:");
-		userName.setBounds(10,10, 80, 25);
-		panel.add(userName);
-		
-		userType = new JTextField(20);
-		userType.setBounds(100, 10, 160, 25);
-		panel.add(userType);
-		
-		passWord = new JLabel("Password:");
-		passWord.setBounds(10,40, 80, 25);
-		panel.add(passWord);
-		
-		passType = new JTextField(20);
-		passType.setBounds(100, 40, 160, 25);
-		panel.add(passType);
-		
-		loginButton = new JButton("Login");
-		loginButton.setBounds(10, 80, 100, 25);
-		panel.add(loginButton);
-		
-		registerButton = new JButton("Register");
-		registerButton.setBounds(160, 80, 100, 25);
-		panel.add(registerButton);
-		
-		displayArea = new JTextArea();
-		displayArea.setBounds(10, 120, 100, 15);
-		displayArea.setEditable(false);
-		panel.add(displayArea);
-		
-		ActionListener loginButtonListener = new ActionListener() {
 
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				doLoginButtonListener();
-			}
-		};
-		loginButton.addActionListener(loginButtonListener);
-		
-		ActionListener registerButtonListener = new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				doRegisterButtonListener();	
-			}
-		};
-		registerButton.addActionListener(registerButtonListener);
-			
-		add(panel, BorderLayout.CENTER);
+		setUpGUILoginClient();
 		
 		setSize(300, 200);
 		setVisible(true);
@@ -162,17 +112,7 @@ public class LoginClient extends JFrame {
             JOptionPane.showMessageDialog(this, "Error sending message: " + ioe);
         }
     }
-    
-  //Process login messages received by client
-  	private boolean processLogin(String login) {
-  		if (login.equals("CONNECTED")) return true;
-  		else if (login.equals("ACCEPTED")) return true;
-  		else {
-  			JOptionPane.showMessageDialog(null, "Wrong Password or Username. Please try again");
-  			return false;
-  		}
-  	}
-	
+    	
 	/**
 	 * Method that contains most of the functionality of the ActionListener of LoginButton.
 	 * Sends the text that is in the JTextField of the GUI to the server, and tries to
@@ -185,17 +125,20 @@ public class LoginClient extends JFrame {
 		try {
 			sendLogin("SENDLOGIN:" + textUsername, "SENDLOGIN:" + textPassword);
 			//Når en connection er established ser server etter to strenger. Passord og brukernavn
-			if (processLogin(input.readLine()) ) {	//Logger inn, dvs lager spill klient
+			if (input.ready()) {	//Logger inn, hvis true
+				int n = input.read();
+				if (n > 0) {
 				setVisible(false);
-				LudoClient client = new LudoClient(LudoClienthost, connection, output, input);
-				client.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);			
+				LudoClient client = new LudoClient(LudoClienthost, connection, output, input, n);
+				client.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
+				}
 			}
+			else JOptionPane.showMessageDialog(null, "Wrong password or username. Please try again");
 					
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, "Login went wrong. Please try again");
 		}
 	}
-  	
   	
 	/**
 	 * Method that contains most of the functionality of the ActionListener of RegisterButton
@@ -224,15 +167,75 @@ public class LoginClient extends JFrame {
   			try {
   				sendRegister("SENDREGISTER:" + textUsername, "SENDREGISTER:" + textPassword);
   				if(processLogin(input.readLine())) {
-  					setVisible(false);
-					LudoClient client = new LudoClient(LudoClienthost, connection, output, input);
-					client.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-  				}			
+  					JOptionPane.showMessageDialog(null, "Account created. Login to play Ludo");
+  				}	
+  				else System.out.println("Error");
   			} catch (Exception e1) {
   				JOptionPane.showMessageDialog(null, "Register went wrong. Please try again");
   			}
 		}
 	}
+	/**
+	 * Process messages received by the client for registration
+	 * @param login String containing message from the server
+	 * @return return true if the registration process is successful, if not return false. 
+	 */
+	private boolean processLogin(String login) {
+		if (login.equals("ACCEPTED")) return true;
+		else {
+			System.out.println(login);
+			JOptionPane.showMessageDialog(null, "User already exists. Please try again");
+			return false;
+		}
+	}
+	void setUpGUILoginClient() {
+		
+		panel = new JPanel(); 
+		panel.setLayout(null);
+		userName = new JLabel("User name:");
+		userName.setBounds(10,10, 80, 25);
+		panel.add(userName);
+		
+		userType = new JTextField(20);
+		userType.setBounds(100, 10, 160, 25);
+		panel.add(userType);
+		
+		passWord = new JLabel("Password:");
+		passWord.setBounds(10,40, 80, 25);
+		panel.add(passWord);
+		
+		passType = new JTextField(20);
+		passType.setBounds(100, 40, 160, 25);
+		panel.add(passType);
+		
+		loginButton = new JButton("Login");
+		loginButton.setBounds(10, 80, 100, 25);
+		panel.add(loginButton);
+		
+		registerButton = new JButton("Register");
+		registerButton.setBounds(160, 80, 100, 25);
+		panel.add(registerButton);
+		
+		displayArea = new JTextArea();
+		displayArea.setBounds(10, 120, 100, 15);
+		displayArea.setEditable(false);
+		panel.add(displayArea);
+		
+		ActionListener loginButtonListener = new ActionListener() {
+		
+			public void actionPerformed(ActionEvent event) {
+				doLoginButtonListener();
+			}		
+		}; 
+		loginButton.addActionListener(loginButtonListener);
+		
+		ActionListener registerButtonListener = new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				doRegisterButtonListener();
+			}
+		};
+		registerButton.addActionListener(registerButtonListener);
 	
-	
+		add(panel, BorderLayout.CENTER);
+	}
 }
