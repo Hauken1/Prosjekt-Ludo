@@ -32,12 +32,12 @@ public class Player {
 			//output = new Formatter(connection.getOutputStream());
 			output = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
 			
-			//loginChecker(input.readLine(), input.readLine());
+			loginChecker(input.readLine(), input.readLine());
 			
-			name = input.readLine();
+			/*name = input.readLine();
 			if (!name.startsWith("LOGIN:"))
 				throw new IOException("No login received from client");
-			name = name.substring(6);
+			name = name.substring(6);*/
 		//} catch (IOException ioE) {
 			//ioE.printStackTrace();
 			
@@ -72,7 +72,7 @@ public class Player {
 			throw new IOException("No login/register received from client");
 		
 		if (username.startsWith("SENDLOGIN:") && pass.startsWith("SENDLOGIN:")) {
-			boolean login = true;	//må skiftes til false når databasen har funksjoner for login
+			boolean login = true;	//mï¿½ skiftes til false nï¿½r databasen har funksjoner for login
 			
 			name = username.substring(10);
 			
@@ -86,7 +86,7 @@ public class Player {
 			}	
 		} 
 		else if (username.startsWith("SENDREGISTER:") && pass.startsWith("SENDREGISTER:")){
-			boolean register = true; //må skiftes til false når databasen har funksjoner for registering.
+			boolean register = true; //mï¿½ skiftes til false nï¿½r databasen har funksjoner for registering.
 			
 			name = username.substring(13);
 			

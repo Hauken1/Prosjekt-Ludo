@@ -100,7 +100,7 @@ public class LoginClient extends JFrame {
 						LudoClient client = new LudoClient(LudoClienthost, connection, output, input);
 						
 						client.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-						client.processConnection();
+						//client.processConnection();
 						
 					}
 					
@@ -138,7 +138,7 @@ public class LoginClient extends JFrame {
 							LudoClient client = new LudoClient(LudoClienthost, connection, output, input);
 							
 							client.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-							client.processConnection();
+							//client.processConnection();
   						}			
   					} catch (Exception e1) {
   						JOptionPane.showMessageDialog(null, "Register went wrong. Please try again");

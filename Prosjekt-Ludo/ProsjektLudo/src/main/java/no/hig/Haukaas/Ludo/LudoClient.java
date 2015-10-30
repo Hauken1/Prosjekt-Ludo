@@ -33,7 +33,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-public class LudoClient extends JFrame {
+public class LudoClient extends JFrame implements Runnable {
 	private String ludoClientHost; //host name for server
 	private JTextArea displayArea; //Displays chat/messages from the server
 	private JPanel kommunikasjon;
@@ -120,6 +120,8 @@ public class LudoClient extends JFrame {
         setSize(600, 400);
         setVisible(true);
         
+        ExecutorService worker = Executors.newFixedThreadPool(1);
+		worker.execute(this); //execute client
 	}
 	
 	/**
@@ -130,8 +132,27 @@ public class LudoClient extends JFrame {
      * Login and logout messages is used to add/remove users to/from the list of
      * participants while all other messages are displayed.
      */
-    public void processConnection() {
+   /* public void processConnection() {
         while (true) {
+            try {
+                String tmp = input.readLine();
+                //System.out.println("tmp: " + tmp); // REMOVE LATER
+                if (tmp.startsWith("LOGIN:")) { // User is logging in
+                    addUser(tmp.substring(6));
+                } else if (tmp.startsWith("LOGOUT:")) { // User is logging out
+                    removeUser(tmp.substring(7));
+                } else { // All other messages
+                    displayMessage(tmp + "\n");
+                }
+            } catch (IOException ioe) {
+                JOptionPane.showMessageDialog(this, "Error receiving data: "
+                        + ioe);
+            }
+        }
+    }*/
+    
+    public void run() {
+    	while (true) {
             try {
                 String tmp = input.readLine();
                 //System.out.println("tmp: " + tmp); // REMOVE LATER
