@@ -38,8 +38,9 @@ public class ChatClient extends JFrame implements Runnable {
     private JTextArea dialog;
     private JTextField textToSend;
     private JList<String> participants;
-    private DefaultListModel<String> participantsModel;
+    private DefaultListModel<String> participantsModel;    
     private String myName;
+    private String myPass;
     private BufferedWriter output;
     private BufferedReader input;
     private Socket connection;
@@ -50,6 +51,7 @@ public class ChatClient extends JFrame implements Runnable {
      * textfield where the user can enter the text to send. To actually send a
      * message the user must press enter in the textfield.
      */
+
     public ChatClient() {
         super("Chat client");
 
@@ -110,11 +112,19 @@ public class ChatClient extends JFrame implements Runnable {
             input = new BufferedReader(new InputStreamReader(
                     connection.getInputStream()));
             myName = JOptionPane.showInputDialog(this, "Your nickname?");
+
+            while (myName == null || myName.equals("")) {
+            	JOptionPane.showMessageDialog(this, "No nick given");
+            	myName = JOptionPane.showInputDialog(this, "Your nickname?");
+            	sendText("LOGIN:" + myName);
+            }
+            
+            /*
             if (myName == null || myName.equals("")) {
                 JOptionPane.showMessageDialog(this, "No nick given");
                 System.exit(1);
             }
-            sendText("LOGIN:" + myName);
+            */
         } catch (IOException ioe) { // If we are unable to connect, alert the
                                     // user and exit
             JOptionPane.showMessageDialog(this, "Error connecting to server: "
@@ -217,7 +227,7 @@ public class ChatClient extends JFrame implements Runnable {
                     .showMessageDialog(this, "Error sending message: " + ioe);
         }
     }
-
+    
     /**
      * Starts the client.
      * 
