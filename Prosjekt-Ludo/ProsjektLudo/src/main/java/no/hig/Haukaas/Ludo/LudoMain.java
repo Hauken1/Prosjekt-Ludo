@@ -7,13 +7,18 @@ public class LudoMain {
 	  public static void main( String[] args )
 	    {
 		  
+		  LoginClient application = new LoginClient("127.0.0.1");
+		  application.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	      application.connect(); // Connect to the server
+		  
+		  /*
 		  ChatClient application = new ChatClient();
 	        application.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	        application.connect(); // Connect to the server
 	        application.processConnection(); // Start processing messages from the
 	                                         // server
 		  
-		  /*
+		  
 		  	//new DatabaseTest(); 
 	        LoginClient client; 
 	        

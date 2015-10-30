@@ -9,33 +9,35 @@ import java.net.Socket;
 import java.util.Formatter;
 import java.util.Scanner;
 
-public class Player implements Runnable {
+public class Player {
 	
 	private Socket connection;
-	private Scanner input;
-	private Formatter output;
+	//private Scanner input;
+	//private Formatter output;
 	
-	private BufferedReader inpute;
-	private BufferedWriter outpute;
+	private BufferedReader input;
+	private BufferedWriter output;
 	
 	private String name;
 	//private int playerNumber;
-	private boolean suspended = true;
+	//private boolean suspended = true;
 
 	public Player(Socket connection) throws IOException {
 		this.connection = connection;
 		
 		//try {
 			//input = new Scanner(connection.getInputStream());
-			inpute = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			input = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			
 			//output = new Formatter(connection.getOutputStream());
-			outpute = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
+			output = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
 			
-			name = inpute.readLine();
-			if (!name.startsWith("LOGIN:"))
-				throw new IOException("No login received from client");
-			name = name.substring(6);
+			loginChecker(input.readLine(), input.readLine());
+			
+			//name = input.readLine();
+			//if (!name.startsWith("LOGIN:"))
+				//throw new IOException("No login received from client");
+			//name = name.substring(6);
 		//} catch (IOException ioE) {
 			//ioE.printStackTrace();
 			
@@ -43,33 +45,70 @@ public class Player implements Runnable {
 	}
 	
 	public void close() throws IOException {
-		inpute.close();
-		outpute.close();
+		input.close();
+		output.close();
 		connection.close();
 	}
 	
 	public void sendText(String text) throws IOException {
-		outpute.write(text);
-		outpute.newLine();
-		outpute.flush();
+		output.write(text);
+		output.newLine();
+		output.flush();
 	}
 	
 	public String read() throws IOException {
-		if (inpute.ready())
-			return inpute.readLine();
+		if (input.ready())
+			return input.readLine();
 		return null;
 	}
 	
+	public String returnName() {
+		return name;
+	}
+	
+	private void loginChecker(String username, String pass) throws IOException {
+		
+		if (!username.startsWith("SENDLOGIN:") && !username.startsWith("SENDREGISTER:"))
+			throw new IOException("No login/register received from client");
+		
+		if (username.startsWith("SENDLOGIN:") && pass.startsWith("SENDLOGIN:")) {
+			boolean login = true;	//må skiftes til false når databasen har funksjoner for login
+			
+			name = username.substring(10);
+			
+		//	user = input.nextLine();
+		//	pw = input.nextLine();
+		// login = DatabaseTest.registerNewUser(user, pw);
+			if(login) {
+				output.write("CONNECTED");
+				output.newLine();
+				output.flush();
+			}	
+		} 
+		else if (username.startsWith("SENDREGISTER:") && pass.startsWith("SENDREGISTER:")){
+			boolean register = true; //må skiftes til false når databasen har funksjoner for registering.
+			
+			name = username.substring(13);
+			
+			//user = input.nextLine();
+			//pw = input.nextLine();
+			//register = DatabaseTest.registerNewUser(user, pw);
+			if (register) {
+				output.write("ACCEPTED");
+				output.newLine();
+				output.flush();
+			}
+		}
+		
+	}
+	
+	/*
 	public void setSuspended(boolean status) {
 		suspended = status;
 	}
 	
 	public boolean online() {
 		return true; 
-	}
-	
-	public String returnName() {
-		return name;
 	}
 	
 	@Override
@@ -111,5 +150,5 @@ public class Player implements Runnable {
 		}
 		
 	}
-	
+	*/
 }

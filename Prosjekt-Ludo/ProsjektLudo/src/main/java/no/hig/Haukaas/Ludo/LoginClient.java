@@ -4,7 +4,12 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -14,6 +19,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -24,7 +30,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-public class LoginClient extends JFrame implements Runnable {
+public class LoginClient extends JFrame {
 	private String LudoClienthost; //host name for server
 	private JTextArea displayArea; 
 	private JTextField idField;
@@ -37,8 +43,8 @@ public class LoginClient extends JFrame implements Runnable {
 	private JButton loginButton;
 	private JButton registerButton;
 	private Socket connection; //connection to server
-	private Scanner input; //input from server
-	private Formatter output; //output to server
+	private BufferedWriter output; //input from server
+	private BufferedReader input; //output to server
 	private boolean test;
 	
 	public LoginClient(String host) {
@@ -77,27 +83,26 @@ public class LoginClient extends JFrame implements Runnable {
 		panel.add(displayArea);
 		
 		ActionListener loginButtonListener = new ActionListener() {
-		
+    		
 			public void actionPerformed(ActionEvent event) {
 				String textUsername = userType.getText();
 				String textPassword = passType.getText();
 				
 				try {
-					sendUserPassLogin(textUsername, textPassword);
+					sendLogin("SENDLOGIN:" + textUsername, "SENDLOGIN:" + textPassword);
 					//Når en connection er established ser server etter to strenger. Passord og brukernavn
-					if(input.hasNextLine()){
-						if (processLogin(input.nextLine()) ) {	//Logger inn, dvs lager spill klient
-							setVisible(false);
-							LudoClient client;
-							client = new LudoClient(LudoClienthost, connection);
-							client.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-						}
-					
+					if (processLogin(input.readLine()) ) {	//Logger inn, dvs lager spill klient
+						setVisible(false);
+						LudoClient client = new LudoClient(LudoClienthost, connection, output, input);
+						client.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+						client.processConnection();
 					}
+					
 				} catch (Exception e) {
-					 System.out.println( "Could not get acces to server" );
+					JOptionPane.showMessageDialog(null, "Login went wrong. Please try again");
 				}
-			}		
+			}
+			
 		}; 
 		loginButton.addActionListener(loginButtonListener);
 		
@@ -122,12 +127,15 @@ public class LoginClient extends JFrame implements Runnable {
   					String textPassword = pass.getText();
   					
   					try {
-  						sendUserPassRegister(textUsername, textPassword);
-  						if(processLogin(input.nextLine()))
-  							JOptionPane.showMessageDialog(null, "Account created. Login to play Ludo");
-  						else System.out.println("Error");		
+  						sendRegister("SENDREGISTER:" + textUsername, "SENDREGISTER:" + textPassword);
+  						if(processLogin(input.readLine())) {
+  							setVisible(false);
+							LudoClient client = new LudoClient(LudoClienthost, connection, output, input);
+							client.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+							//client.processConnection();
+  						}			
   					} catch (Exception e1) {
-  							JOptionPane.showMessageDialog(null, "Something went wrong. Please try again");
+  						JOptionPane.showMessageDialog(null, "Register went wrong. Please try again");
   					}
 				}
 			}
@@ -138,9 +146,72 @@ public class LoginClient extends JFrame implements Runnable {
 		
 		setSize(300, 200);
 		setVisible(true);
-		startClient();
 	}
 	
+	/**
+     * Connects to the server, on port 12345 and localhost. This would be
+     * changed for a production version. Once the socket connection is
+     * established a bufferedReader and a bufferedWriter is created, this is our
+     * input and output.
+     * 
+     * Once connected the user is asked to provide a nickname to be used
+     * throughout the session. A login message is then sent to the server with
+     * that nickname.
+     */
+    public void connect() {
+        try {
+            connection = new Socket(LudoClienthost, 12347);
+            displayArea.append("Online");
+            output = new BufferedWriter(new OutputStreamWriter(
+                    connection.getOutputStream()));
+            input = new BufferedReader(new InputStreamReader(
+                    connection.getInputStream()));
+            
+        } catch (IOException ioe) { // If we are unable to connect, alert the
+                                    // user and exit
+            JOptionPane.showMessageDialog(this, "Error connecting to server: "
+                    + ioe);
+            displayArea.append("Offline");
+        }
+    }
+    
+    private void sendLogin(String username, String password) {
+        try {
+            output.write(username);
+            output.newLine();
+            output.flush();
+            output.write(password);
+            output.newLine();
+            output.flush();
+        } catch (IOException ioe) {
+            JOptionPane.showMessageDialog(this, "Error sending message: " + ioe);
+        }
+    }
+    
+    private void sendRegister(String username, String password) {
+        try {
+            output.write(username);
+            output.newLine();
+            output.flush();
+            output.write(password);
+            output.newLine();
+            output.flush();
+        } catch (IOException ioe) {
+            JOptionPane.showMessageDialog(this, "Error sending message: " + ioe);
+        }
+    }
+    
+  //Process login messages received by client
+  	private boolean processLogin(String login) {
+  		if (login.equals("CONNECTED")) return true;
+  		else if (login.equals("ACCEPTED")) return true;
+  		else {
+  			JOptionPane.showMessageDialog(null, "Wrong Password or Username. Please try again");
+  			return false;
+  		}
+  	}
+	
+    /*
 	public void startClient() {
 		try {	//connect to server and get streams
 			//Make a connection to server
@@ -149,8 +220,8 @@ public class LoginClient extends JFrame implements Runnable {
 			displayArea.append("Online");
 			
 			//get streams for input and output
-			input = new Scanner(connection.getInputStream());
-			output = new Formatter(connection.getOutputStream());
+			output = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
+			input = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			
 		}
 		catch (IOException ioE) {
@@ -158,8 +229,8 @@ public class LoginClient extends JFrame implements Runnable {
 			displayArea.append("Offline");
 		}
 		//create and start worker thread for this client
-		ExecutorService worker = Executors.newFixedThreadPool(1);
-		worker.execute(this); //execute client
+		//ExecutorService worker = Executors.newFixedThreadPool(1);
+		//worker.execute(this); //execute client
 	}
 	
 	//control thread that allows continuous update of displayArea
@@ -192,4 +263,5 @@ public class LoginClient extends JFrame implements Runnable {
 		}
 		
 	}
+	*/
 }
