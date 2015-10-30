@@ -13,7 +13,7 @@ public class Internationalization {
 	 * Nothing
 	 */
 	public Internationalization() {
-	}
+	}  
 
     /**
      * Returns the choosen message

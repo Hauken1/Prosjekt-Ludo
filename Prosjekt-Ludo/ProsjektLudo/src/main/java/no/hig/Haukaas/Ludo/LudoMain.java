@@ -2,21 +2,24 @@ package no.hig.Haukaas.Ludo;
 
 import javax.swing.JFrame;
 
-import globalServer.DatabaseHandler;
-
 public class LudoMain {
 
 	  public static void main( String[] args )
 	    {
-		 	//new DatabaseHandler(); 
 		  
 		  LoginClient application = new LoginClient("127.0.0.1");
 		  application.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	      application.connect(); // Connect to the server
 		  
 		  
-
-	       /* LoginClient client; 
+		  //ChatClient applicatin = new ChatClient();
+	      //applicatin.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	      //applicatin.connect(); // Connect to the server
+	      //applicatin.processConnection(); // Start processing messages from the
+	                                        // server
+		  /*
+		  	//new DatabaseTest(); 
+	        LoginClient client; 
 	        
 	        if (args.length == 0) {
 	        	client = new LoginClient("127.0.0.1");	//Localhost
@@ -25,7 +28,7 @@ public class LudoMain {
 	        else
 	        	client = new LoginClient(args[0]);	//use args
 	        client.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	    }*/
-	    
+	    }
+	    */
 	    }
 }
