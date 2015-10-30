@@ -33,12 +33,11 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-public class LudoClient extends JFrame {
+public class LudoClient extends JFrame implements Runnable {
 	private String ludoClientHost; //host name for server
 	private JTextArea displayArea; //Displays chat/messages from the server
 	private JPanel kommunikasjon;
 	private JPanel spillBord;
-	
 	private JTextArea dialog;
     private JTextField textToSend;
     private JList<String> participants;
@@ -48,6 +47,14 @@ public class LudoClient extends JFrame {
     private BufferedReader input;
     private Socket connection;
 	
+    /**
+	 * Constructor for the Ludo client. 
+	 * Makes a JFrame window where players can interact with each other and join games.
+	 * 
+	 * @param host	IP address of the server
+	 * @param socket	Connection to the server
+	 * @param spillerID	PlayerID retrived from the Database.
+	 */
 	public LudoClient(String host, Socket connection, BufferedWriter output, BufferedReader input) {
 		super("Ludo Klient");
 		ludoClientHost = host;
@@ -58,7 +65,18 @@ public class LudoClient extends JFrame {
 		//spillBord = new JPanel();
 		//kommunikasjon = new JPanel();
 		
-		//boardPanel = new JPanel(); //Kan brukes for å vise spillet
+		displayArea = new JTextArea(4, 30);
+		displayArea.setEditable(true);
+		add(new JScrollPane(displayArea), BorderLayout.SOUTH);
+		
+		try {	//Prï¿½ver ï¿½ lage spill bordet
+			LudoBoard board = new LudoBoard();
+			add(board, BorderLayout.CENTER);
+		} catch (Exception e) {
+			System.out.println("Noe feil med brettet");
+		}
+		
+		//boardPanel = new JPanel(); //Kan brukes for ï¿½ vise spillet
 		//boardPanel.setLayout(new GridLayout(3,3,0,0));	//Setter hvordan panelet skal se ut
 			
 		//idField = new JTextField(); //Set ut textfield
@@ -102,6 +120,8 @@ public class LudoClient extends JFrame {
         setSize(600, 400);
         setVisible(true);
         
+        ExecutorService worker = Executors.newFixedThreadPool(1);
+		worker.execute(this); //execute client
 	}
 	
 	/**
@@ -112,8 +132,27 @@ public class LudoClient extends JFrame {
      * Login and logout messages is used to add/remove users to/from the list of
      * participants while all other messages are displayed.
      */
-    public void processConnection() {
+   /* public void processConnection() {
         while (true) {
+            try {
+                String tmp = input.readLine();
+                //System.out.println("tmp: " + tmp); // REMOVE LATER
+                if (tmp.startsWith("LOGIN:")) { // User is logging in
+                    addUser(tmp.substring(6));
+                } else if (tmp.startsWith("LOGOUT:")) { // User is logging out
+                    removeUser(tmp.substring(7));
+                } else { // All other messages
+                    displayMessage(tmp + "\n");
+                }
+            } catch (IOException ioe) {
+                JOptionPane.showMessageDialog(this, "Error receiving data: "
+                        + ioe);
+            }
+        }
+    }*/
+    
+    public void run() {
+    	while (true) {
             try {
                 String tmp = input.readLine();
                 //System.out.println("tmp: " + tmp); // REMOVE LATER
@@ -181,5 +220,4 @@ public class LudoClient extends JFrame {
                     .showMessageDialog(this, "Error sending message: " + ioe);
         }
     }
-
 }

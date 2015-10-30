@@ -32,12 +32,12 @@ public class Player {
 			//output = new Formatter(connection.getOutputStream());
 			output = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
 			
-			//loginChecker(input.readLine(), input.readLine());
+			loginChecker(input.readLine(), input.readLine());
 			
-			name = input.readLine();
+			/*name = input.readLine();
 			if (!name.startsWith("LOGIN:"))
 				throw new IOException("No login received from client");
-			name = name.substring(6);
+			name = name.substring(6);*/
 		//} catch (IOException ioE) {
 			//ioE.printStackTrace();
 			
@@ -72,7 +72,7 @@ public class Player {
 			throw new IOException("No login/register received from client");
 		
 		if (username.startsWith("SENDLOGIN:") && pass.startsWith("SENDLOGIN:")) {
-			boolean login = true;	//må skiftes til false når databasen har funksjoner for login
+			boolean login = true;	//mï¿½ skiftes til false nï¿½r databasen har funksjoner for login
 			
 			name = username.substring(10);
 			
@@ -86,7 +86,7 @@ public class Player {
 			}	
 		} 
 		else if (username.startsWith("SENDREGISTER:") && pass.startsWith("SENDREGISTER:")){
-			boolean register = true; //må skiftes til false når databasen har funksjoner for registering.
+			boolean register = true; //mï¿½ skiftes til false nï¿½r databasen har funksjoner for registering.
 			
 			name = username.substring(13);
 			
@@ -119,22 +119,31 @@ public class Player {
 			String user, pw, loginregister;
 			loginregister = input.nextLine();
 			if (loginregister.equals("LOGIN")) {
-				boolean login = true;	//må skiftes til false når databasen har funksjoner for login
-			//	user = input.nextLine();
-			//	pw = input.nextLine();
-			// login = DatabaseTest.registerNewUser(user, pw);
-				if(login) {
-					output.format("%s\n", "CONNECTED");
+				int login = 0;	
+				user = input.nextLine();
+				pw = input.nextLine();
+				login = DatabaseHandler.userLogin(user, pw);
+				if(login > 0) {
+					output.format("%d\n", login);
 					output.flush();
-				}	
+				}
+				else if (login == 0) {
+					output.format("%d\n", login);
+					output.flush();
+					
+				}
 			} 
 			else if (loginregister.equals("REGISTER")){
-				boolean register = true; //må skiftes til false når databasen har funksjoner for registering.
-				//user = input.nextLine();
-				//pw = input.nextLine();
-				//register = DatabaseTest.registerNewUser(user, pw);
+				boolean register = false;
+				user = input.nextLine();
+				pw = input.nextLine();
+				register = DatabaseHandler.registerNewUser(user, pw);
 				if (register) {
 					output.format("%s\n", "ACCEPTED");
+					output.flush();
+				}
+				else {
+					output.format("%s\n", "DECLINED");
 					output.flush();
 				}
 			}
