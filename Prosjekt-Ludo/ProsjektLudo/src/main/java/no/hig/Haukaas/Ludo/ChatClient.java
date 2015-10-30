@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
@@ -32,7 +34,7 @@ import javax.swing.SwingUtilities;
  * @author okolloen
  *
  */
-public class ChatClient extends JFrame {
+public class ChatClient extends JFrame implements Runnable {
     private JTextArea dialog;
     private JTextField textToSend;
     private JList<String> participants;
@@ -85,6 +87,9 @@ public class ChatClient extends JFrame {
         });
         setSize(600, 400);
         setVisible(true);
+        
+        ExecutorService worker = Executors.newFixedThreadPool(1);
+		worker.execute(this); //execute client
     }
 
     /**
@@ -126,8 +131,26 @@ public class ChatClient extends JFrame {
      * Login and logout messages is used to add/remove users to/from the list of
      * participants while all other messages are displayed.
      */
-    public void processConnection() {
+   /* public void processConnection() {
         while (true) {
+            try {
+                String tmp = input.readLine();
+                if (tmp.startsWith("LOGIN:")) { // User is logging in
+                    addUser(tmp.substring(6));
+                } else if (tmp.startsWith("LOGOUT:")) { // User is logging out
+                    removeUser(tmp.substring(7));
+                } else { // All other messages
+                    displayMessage(tmp + "\n");
+                }
+            } catch (IOException ioe) {
+                JOptionPane.showMessageDialog(this, "Error receiving data: "
+                        + ioe);
+            }
+        }
+    }*/
+    
+    public void run() {
+    	while (true) {
             try {
                 String tmp = input.readLine();
                 if (tmp.startsWith("LOGIN:")) { // User is logging in
