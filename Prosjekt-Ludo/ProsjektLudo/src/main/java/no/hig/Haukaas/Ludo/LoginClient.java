@@ -94,8 +94,10 @@ public class LoginClient extends JFrame {
 					if (processLogin(input.readLine()) ) {	//Logger inn, dvs lager spill klient
 						setVisible(false);
 						LudoClient client = new LudoClient(LudoClienthost, connection, output, input);
+						
 						client.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 						client.processConnection();
+						
 					}
 					
 				} catch (Exception e) {
@@ -131,8 +133,9 @@ public class LoginClient extends JFrame {
   						if(processLogin(input.readLine())) {
   							setVisible(false);
 							LudoClient client = new LudoClient(LudoClienthost, connection, output, input);
+							
 							client.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-							//client.processConnection();
+							client.processConnection();
   						}			
   					} catch (Exception e1) {
   						JOptionPane.showMessageDialog(null, "Register went wrong. Please try again");
@@ -210,6 +213,12 @@ public class LoginClient extends JFrame {
   			return false;
   		}
   	}
+  	
+  	public void close() throws IOException {
+		input.close();
+		output.close();
+		connection.close();
+	}
 	
     /*
 	public void startClient() {

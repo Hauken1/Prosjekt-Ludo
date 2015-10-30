@@ -32,12 +32,12 @@ public class Player {
 			//output = new Formatter(connection.getOutputStream());
 			output = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
 			
-			loginChecker(input.readLine(), input.readLine());
+			//loginChecker(input.readLine(), input.readLine());
 			
-			//name = input.readLine();
-			//if (!name.startsWith("LOGIN:"))
-				//throw new IOException("No login received from client");
-			//name = name.substring(6);
+			name = input.readLine();
+			if (!name.startsWith("LOGIN:"))
+				throw new IOException("No login received from client");
+			name = name.substring(6);
 		//} catch (IOException ioE) {
 			//ioE.printStackTrace();
 			

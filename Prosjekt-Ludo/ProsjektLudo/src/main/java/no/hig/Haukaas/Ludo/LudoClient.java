@@ -114,9 +114,9 @@ public class LudoClient extends JFrame {
      */
     public void processConnection() {
         while (true) {
-        	System.out.println("Hello!");
             try {
                 String tmp = input.readLine();
+                //System.out.println("tmp: " + tmp); // REMOVE LATER
                 if (tmp.startsWith("LOGIN:")) { // User is logging in
                     addUser(tmp.substring(6));
                 } else if (tmp.startsWith("LOGOUT:")) { // User is logging out

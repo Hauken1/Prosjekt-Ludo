@@ -109,7 +109,6 @@ public class ChatClient extends JFrame {
             input = new BufferedReader(new InputStreamReader(
                     connection.getInputStream()));
             myName = JOptionPane.showInputDialog(this, "Your nickname?");
-            myPass = JOptionPane.showInputDialog(this, "Your password?");
             while (myName == null || myName.equals("")) {
             	JOptionPane.showMessageDialog(this, "No nick given");
             	myName = JOptionPane.showInputDialog(this, "Your nickname?");
