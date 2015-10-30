@@ -97,7 +97,7 @@ public class LudoBoard extends JPanel {
 			}
 			else if (row >= 9 && column >= 9){
 				g.drawRect(0, 0, 145, 80);
-				g.setColor(color[3]);
+				g.setColor(color[4]);
 				g.fillRect(0, 0, 145, 80);
 			}
 			
