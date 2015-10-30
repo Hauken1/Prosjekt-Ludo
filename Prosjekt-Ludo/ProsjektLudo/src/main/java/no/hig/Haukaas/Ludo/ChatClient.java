@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
@@ -32,15 +34,13 @@ import javax.swing.SwingUtilities;
  * @author okolloen
  *
  */
-public class ChatClient extends JFrame {
+public class ChatClient extends JFrame implements Runnable {
     private JTextArea dialog;
     private JTextField textToSend;
     private JList<String> participants;
-    private DefaultListModel<String> participantsModel;
-    
+    private DefaultListModel<String> participantsModel;    
     private String myName;
     private String myPass;
-    
     private BufferedWriter output;
     private BufferedReader input;
     private Socket connection;
@@ -51,7 +51,7 @@ public class ChatClient extends JFrame {
      * textfield where the user can enter the text to send. To actually send a
      * message the user must press enter in the textfield.
      */
-    
+
     public ChatClient() {
         super("Chat client");
 
@@ -89,6 +89,9 @@ public class ChatClient extends JFrame {
         });
         setSize(600, 400);
         setVisible(true);
+        
+        ExecutorService worker = Executors.newFixedThreadPool(1);
+		worker.execute(this); //execute client
     }
 
     /**
@@ -109,9 +112,11 @@ public class ChatClient extends JFrame {
             input = new BufferedReader(new InputStreamReader(
                     connection.getInputStream()));
             myName = JOptionPane.showInputDialog(this, "Your nickname?");
+
             while (myName == null || myName.equals("")) {
             	JOptionPane.showMessageDialog(this, "No nick given");
             	myName = JOptionPane.showInputDialog(this, "Your nickname?");
+            	sendText("LOGIN:" + myName);
             }
             
             /*
@@ -120,8 +125,6 @@ public class ChatClient extends JFrame {
                 System.exit(1);
             }
             */
-            
-            sendText("LOGIN:" + myName);
         } catch (IOException ioe) { // If we are unable to connect, alert the
                                     // user and exit
             JOptionPane.showMessageDialog(this, "Error connecting to server: "
@@ -138,8 +141,26 @@ public class ChatClient extends JFrame {
      * Login and logout messages is used to add/remove users to/from the list of
      * participants while all other messages are displayed.
      */
-    public void processConnection() {
+   /* public void processConnection() {
         while (true) {
+            try {
+                String tmp = input.readLine();
+                if (tmp.startsWith("LOGIN:")) { // User is logging in
+                    addUser(tmp.substring(6));
+                } else if (tmp.startsWith("LOGOUT:")) { // User is logging out
+                    removeUser(tmp.substring(7));
+                } else { // All other messages
+                    displayMessage(tmp + "\n");
+                }
+            } catch (IOException ioe) {
+                JOptionPane.showMessageDialog(this, "Error receiving data: "
+                        + ioe);
+            }
+        }
+    }*/
+    
+    public void run() {
+    	while (true) {
             try {
                 String tmp = input.readLine();
                 if (tmp.startsWith("LOGIN:")) { // User is logging in
@@ -187,7 +208,7 @@ public class ChatClient extends JFrame {
         SwingUtilities
                 .invokeLater(() -> participantsModel.addElement(username));
     }
-    
+
     /**
      * Method used to send a message to the server. Handled in a separate method
      * to ensure that all messages are ended with a newline character and are
@@ -206,5 +227,18 @@ public class ChatClient extends JFrame {
                     .showMessageDialog(this, "Error sending message: " + ioe);
         }
     }
-
+    
+    /**
+     * Starts the client.
+     * 
+     * @param args
+     *            not used
+     */
+/*    public static void main(String[] args) {
+        ChatClient application = new ChatClient();
+        application.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        application.connect(); // Connect to the server
+        application.processConnection(); // Start processing messages from the
+                                         // server
+    }*/
 }
