@@ -2,6 +2,7 @@ package no.hig.Haukaas.Ludo;
 
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -27,7 +28,9 @@ public class LudoClient extends JFrame implements Runnable {
 	private String ludoClientHost; //host name for server
 	private JTextArea displayArea; //Displays chat/messages from the server
 	private JPanel kommunikasjon;
-	private JPanel spillBord;
+	private JPanel GUI;
+	private JButton spillEtSpillButton;
+	private JButton chatButton;
 	
 	/**
 	 * Constructor for the Ludo client. 
@@ -44,9 +47,35 @@ public class LudoClient extends JFrame implements Runnable {
 		//spillBord = new JPanel();
 		//kommunikasjon = new JPanel();
 		
+		GUI = new JPanel();
+		
 		displayArea = new JTextArea(4, 30);
 		displayArea.setEditable(true);
 		add(new JScrollPane(displayArea), BorderLayout.SOUTH);
+		
+		spillEtSpillButton = new JButton("Spill");
+		spillEtSpillButton.setPreferredSize(new Dimension(100,100));
+		GUI.add(spillEtSpillButton);
+		
+		chatButton = new JButton("Chat");
+		chatButton.setPreferredSize(new Dimension(100,100));
+		GUI.add(chatButton);
+		
+		ActionListener spillButtonListener = new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				
+			}
+		};
+		spillEtSpillButton.addActionListener(spillButtonListener);
+		
+		ActionListener chatButtonListener = new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				
+			}
+		};
+		chatButton.addActionListener(chatButtonListener);
+		
+		add(GUI, BorderLayout.NORTH);
 		
 		try {	//Prøver å lage spill bordet
 			LudoBoard board = new LudoBoard();
