@@ -26,6 +26,8 @@ import javax.swing.JTextField;
 
 public class LudoClient extends JFrame implements Runnable {
 	private String ludoClientHost; //host name for server
+	private Socket connection;
+	private int playerID;
 	private JTextArea displayArea; //Displays chat/messages from the server
 	private JPanel kommunikasjon;
 	private JPanel GUI;
@@ -42,57 +44,13 @@ public class LudoClient extends JFrame implements Runnable {
 	 */
 	public LudoClient(String host, Socket socket, int spillerID) {
 		super("Ludo Klient");
+		
 		ludoClientHost = host;
+		connection = socket;
+		playerID = spillerID;
 		
-		//spillBord = new JPanel();
-		//kommunikasjon = new JPanel();
-		
-		GUI = new JPanel();
-		
-		displayArea = new JTextArea(4, 30);
-		displayArea.setEditable(true);
-		add(new JScrollPane(displayArea), BorderLayout.SOUTH);
-		
-		spillEtSpillButton = new JButton("Spill");
-		spillEtSpillButton.setPreferredSize(new Dimension(100,100));
-		GUI.add(spillEtSpillButton);
-		
-		chatButton = new JButton("Chat");
-		chatButton.setPreferredSize(new Dimension(100,100));
-		GUI.add(chatButton);
-		
-		ActionListener spillButtonListener = new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				
-			}
-		};
-		spillEtSpillButton.addActionListener(spillButtonListener);
-		
-		ActionListener chatButtonListener = new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				
-			}
-		};
-		chatButton.addActionListener(chatButtonListener);
-		
-		add(GUI, BorderLayout.NORTH);
-		
-		try {	//Prøver å lage spill bordet
-			LudoBoard board = new LudoBoard();
-			add(board, BorderLayout.CENTER);
-		} catch (Exception e) {
-			System.out.println("Noe feil med brettet");
-		}
-		
-		//boardPanel = new JPanel(); //Kan brukes for å vise spillet
-		//boardPanel.setLayout(new GridLayout(3,3,0,0));	//Setter hvordan panelet skal se ut
-			
-		//idField = new JTextField(); //Set ut textfield
-		//idField.setEditable(false);
-		//add(idField, BorderLayout.NORTH);		
-		//panel.add(boardPanel, BorderLayout.CENTER); 
-		//add(kommunikasjon);
-		
+		setUpGUILudoClient();
+					
 		setSize(1000, 1000);
 		setVisible(true);		
 	}
@@ -100,5 +58,43 @@ public class LudoClient extends JFrame implements Runnable {
 	public void run() {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public void doSpillButtonListener() {
+		setVisible(false);
+		GameClient gameClient;
+		gameClient = new GameClient(ludoClientHost, connection, playerID);
+		gameClient.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	}
+	public void setUpGUILudoClient() {
+		GUI = new JPanel();
+		
+		displayArea = new JTextArea(4, 30);
+		displayArea.setEditable(true);
+		add(new JScrollPane(displayArea), BorderLayout.SOUTH);
+		
+		spillEtSpillButton = new JButton("Spill");
+		spillEtSpillButton.setPreferredSize(new Dimension(300,300));
+		GUI.add(spillEtSpillButton);
+		
+		chatButton = new JButton("Chat");
+		chatButton.setPreferredSize(new Dimension(300,300));	//Overdrevent, I know
+		GUI.add(chatButton);
+		
+		ActionListener spillButtonListener = new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				doSpillButtonListener();
+			}
+		};
+		spillEtSpillButton.addActionListener(spillButtonListener);
+		
+		ActionListener chatButtonListener = new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				//TODO Petter
+			}
+		};
+		chatButton.addActionListener(chatButtonListener);
+		
+		add(GUI, BorderLayout.NORTH);
 	}
 }

@@ -48,53 +48,7 @@ public class LoginClient extends JFrame implements Runnable {
 		super("Ludo Login");
 		LudoClienthost = host; 
 		
-		panel = new JPanel(); 
-		panel.setLayout(null);
-		userName = new JLabel("User name:");
-		userName.setBounds(10,10, 80, 25);
-		panel.add(userName);
-		
-		userType = new JTextField(20);
-		userType.setBounds(100, 10, 160, 25);
-		panel.add(userType);
-		
-		passWord = new JLabel("Password:");
-		passWord.setBounds(10,40, 80, 25);
-		panel.add(passWord);
-		
-		passType = new JTextField(20);
-		passType.setBounds(100, 40, 160, 25);
-		panel.add(passType);
-		
-		loginButton = new JButton("Login");
-		loginButton.setBounds(10, 80, 100, 25);
-		panel.add(loginButton);
-		
-		registerButton = new JButton("Register");
-		registerButton.setBounds(160, 80, 100, 25);
-		panel.add(registerButton);
-		
-		displayArea = new JTextArea();
-		displayArea.setBounds(10, 120, 100, 15);
-		displayArea.setEditable(false);
-		panel.add(displayArea);
-		
-		ActionListener loginButtonListener = new ActionListener() {
-		
-			public void actionPerformed(ActionEvent event) {
-				doLoginButtonListener();
-			}		
-		}; 
-		loginButton.addActionListener(loginButtonListener);
-		
-		ActionListener registerButtonListener = new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				doRegisterButtonListener();
-			}
-		};
-		registerButton.addActionListener(registerButtonListener);
-	
-		add(panel, BorderLayout.CENTER);
+		setUpGUILoginClient();
 		
 		setSize(300, 200);
 		setVisible(true);
@@ -223,5 +177,55 @@ public class LoginClient extends JFrame implements Runnable {
 			JOptionPane.showMessageDialog(null, "User already exists. Please try again");
 			return false;
 		}
+	}
+	void setUpGUILoginClient() {
+		
+		panel = new JPanel(); 
+		panel.setLayout(null);
+		userName = new JLabel("User name:");
+		userName.setBounds(10,10, 80, 25);
+		panel.add(userName);
+		
+		userType = new JTextField(20);
+		userType.setBounds(100, 10, 160, 25);
+		panel.add(userType);
+		
+		passWord = new JLabel("Password:");
+		passWord.setBounds(10,40, 80, 25);
+		panel.add(passWord);
+		
+		passType = new JTextField(20);
+		passType.setBounds(100, 40, 160, 25);
+		panel.add(passType);
+		
+		loginButton = new JButton("Login");
+		loginButton.setBounds(10, 80, 100, 25);
+		panel.add(loginButton);
+		
+		registerButton = new JButton("Register");
+		registerButton.setBounds(160, 80, 100, 25);
+		panel.add(registerButton);
+		
+		displayArea = new JTextArea();
+		displayArea.setBounds(10, 120, 100, 15);
+		displayArea.setEditable(false);
+		panel.add(displayArea);
+		
+		ActionListener loginButtonListener = new ActionListener() {
+		
+			public void actionPerformed(ActionEvent event) {
+				doLoginButtonListener();
+			}		
+		}; 
+		loginButton.addActionListener(loginButtonListener);
+		
+		ActionListener registerButtonListener = new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				doRegisterButtonListener();
+			}
+		};
+		registerButton.addActionListener(registerButtonListener);
+	
+		add(panel, BorderLayout.CENTER);
 	}
 }
