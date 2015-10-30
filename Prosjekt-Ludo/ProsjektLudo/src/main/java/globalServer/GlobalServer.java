@@ -22,21 +22,13 @@ public class GlobalServer extends JFrame{
 	private ServerSocket server;
 	private ExecutorService executorService;
 	
-	private Lock gameLock;
-	private final int SERVERLIMIT = 100;
-	
 	private JTextArea outputArea;
 	
-	//private Player[] players;
 	private ArrayList<Player> player = new ArrayList<Player>();
 	
 	private ArrayBlockingQueue<String> messages = new ArrayBlockingQueue<String>(50);
 	
 	private boolean shutdown = false;
-	
-	private int currentPlayer;
-	private Condition otherPlayerConnected;
-	private Condition otherPlayerTurn;
 	
 	public GlobalServer() {
 		
@@ -45,24 +37,8 @@ public class GlobalServer extends JFrame{
 		outputArea = new JTextArea();
 		outputArea.setFont(new Font("Ariel", Font.PLAIN, 14));
 		outputArea.setEditable(false);
-		add(new JScrollPane(outputArea));
-		
-		// create ExecutorService with a thread for each player
-		//executorService = Executors.newCachedThreadPool();
-		
-		/*
-		gameLock = new ReentrantLock();
-		
-		
-		// condition variable for both players being connected
-		otherPlayerConnected = gameLock.newCondition();
-		
-		// condition variable for the other player's turn
-		otherPlayerTurn = gameLock.newCondition();
-		
-		*/
-		
-		//players = new Player[SERVERLIMIT];
+		add(new JScrollPane(outputArea), BorderLayout.CENTER);
+		outputArea.setText("Server awaiting connections\n");
 		
 		try {
 			server = new ServerSocket(12347); // Set up serverSocket
@@ -78,13 +54,8 @@ public class GlobalServer extends JFrame{
 			System.exit(1);
 		}
 		
-		//outputArea = new JTextArea();
-		//add(outputArea, BorderLayout.CENTER);
-		//outputArea.setText("Server awaiting connections\n");
-		
 		setSize(600, 400);
-		setVisible(true);
-		
+		setVisible(true);	
 	}
 
 	private void startMessageListener() {
@@ -180,48 +151,5 @@ public class GlobalServer extends JFrame{
 	private void displayMessage(String text) {
 		SwingUtilities.invokeLater(() -> outputArea.append(text));
 	}
-	
-	
-	
-	/*
-	
-	public void execute() {
-		// wait for each client to connect
-		for (int i=0; i<player.length; i++) {
-			try { // wait for connection, create Player, start runnable
-				//players[i] = new Player(server.accept(), i);
-				Player p =  new Player(server.accept());
-				player.add(p);
-				displayMessage("Player " + i + " connected\n");
-				executorService.execute(players[i]);
-			} catch (IOException ioE) {
-				ioE.printStackTrace();
-			}
-		}
-		
-		
-		gameLock.lock();
-		
-		try {
-			otherPlayerConnected.signal();
-		} finally {
-			gameLock.unlock(); 
-		}	
-		
-	}
-	
-	
-	public void displayMessage(final String messageToDisplay) {
-		// display message from event dispatch thread of execution
-		SwingUtilities.invokeLater(
-				new Runnable() {
-					public void run() { // updates outputArea
-						outputArea.append(messageToDisplay);
-					}
-				}
-		);					
-	}
-	*/
-	
 	
 }

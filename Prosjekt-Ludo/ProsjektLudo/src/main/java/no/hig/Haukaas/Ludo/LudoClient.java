@@ -1,6 +1,5 @@
 package no.hig.Haukaas.Ludo;
 
-
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
@@ -14,8 +13,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Formatter;
+import java.util.Iterator;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -33,7 +34,9 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-public class LudoClient extends JFrame implements Runnable {
+import globalServer.Player;
+
+public class LudoClient extends JFrame {
 	private String ludoClientHost; //host name for server
 	private JTextArea displayArea; //Displays chat/messages from the server
 	private JPanel kommunikasjon;
@@ -46,6 +49,8 @@ public class LudoClient extends JFrame implements Runnable {
     private BufferedWriter output;
     private BufferedReader input;
     private Socket connection;
+    
+    private ExecutorService executorService;
 	
     /**
 	 * Constructor for the Ludo client. 
@@ -57,7 +62,7 @@ public class LudoClient extends JFrame implements Runnable {
 	 */
 	public LudoClient(String host, Socket connection, BufferedWriter output, BufferedReader input) {
 		super("Ludo Klient");
-		ludoClientHost = host;
+		this.ludoClientHost = host;
 		this.connection = connection;
 		this.output = output;
 		this.input = input;
@@ -69,14 +74,14 @@ public class LudoClient extends JFrame implements Runnable {
 		displayArea.setEditable(true);
 		add(new JScrollPane(displayArea), BorderLayout.SOUTH);
 		
-		try {	//Prï¿½ver ï¿½ lage spill bordet
+		try {	//Prøver å lage spill bordet
 			LudoBoard board = new LudoBoard();
 			add(board, BorderLayout.CENTER);
 		} catch (Exception e) {
 			System.out.println("Noe feil med brettet");
 		}
 		
-		//boardPanel = new JPanel(); //Kan brukes for ï¿½ vise spillet
+		//boardPanel = new JPanel(); //Kan brukes for å vise spillet
 		//boardPanel.setLayout(new GridLayout(3,3,0,0));	//Setter hvordan panelet skal se ut
 			
 		//idField = new JTextField(); //Set ut textfield
@@ -120,55 +125,30 @@ public class LudoClient extends JFrame implements Runnable {
         setSize(600, 400);
         setVisible(true);
         
-        ExecutorService worker = Executors.newFixedThreadPool(1);
-		worker.execute(this); //execute client
+		executorService = Executors.newCachedThreadPool();
+		processConnection();
+		executorService.shutdown();
+		
 	}
 	
-	/**
-     * This method handles the communication from the server. Note that this
-     * method never returns, messages from the server is read in a loop that
-     * never ends. All other user interaction is handled in the GUI thread.
-     * 
-     * Login and logout messages is used to add/remove users to/from the list of
-     * participants while all other messages are displayed.
-     */
-   /* public void processConnection() {
-        while (true) {
-            try {
-                String tmp = input.readLine();
-                //System.out.println("tmp: " + tmp); // REMOVE LATER
-                if (tmp.startsWith("LOGIN:")) { // User is logging in
-                    addUser(tmp.substring(6));
-                } else if (tmp.startsWith("LOGOUT:")) { // User is logging out
-                    removeUser(tmp.substring(7));
-                } else { // All other messages
-                    displayMessage(tmp + "\n");
-                }
-            } catch (IOException ioe) {
-                JOptionPane.showMessageDialog(this, "Error receiving data: "
-                        + ioe);
-            }
-        }
-    }*/
-    
-    public void run() {
-    	while (true) {
-            try {
-                String tmp = input.readLine();
-                //System.out.println("tmp: " + tmp); // REMOVE LATER
-                if (tmp.startsWith("LOGIN:")) { // User is logging in
-                    addUser(tmp.substring(6));
-                } else if (tmp.startsWith("LOGOUT:")) { // User is logging out
-                    removeUser(tmp.substring(7));
-                } else { // All other messages
-                    displayMessage(tmp + "\n");
-                }
-            } catch (IOException ioe) {
-                JOptionPane.showMessageDialog(this, "Error receiving data: "
-                        + ioe);
-            }
-        }
-    }
+	private void processConnection() {
+		executorService.execute(() -> {
+			while (true) {
+				try {
+	                String tmp = input.readLine();
+	                if (tmp.startsWith("LOGIN:")) { // User is logging in
+	                    addUser(tmp.substring(6));
+	                } else if (tmp.startsWith("LOGOUT:")) { // User is logging out
+	                    removeUser(tmp.substring(7));
+	                } else { // All other messages
+	                    displayMessage(tmp + "\n");
+	                }
+	            } catch (IOException ioe) {
+	                JOptionPane.showMessageDialog(this, "Error receiving data: " + ioe);
+	            }
+			}
+		});
+	}
 
     /**
      * Used to add messages to the message area in a thread safe manner

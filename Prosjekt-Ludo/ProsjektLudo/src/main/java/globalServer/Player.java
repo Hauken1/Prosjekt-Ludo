@@ -6,42 +6,23 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.util.Formatter;
-import java.util.Scanner;
 
 public class Player {
 	
 	private Socket connection;
-	//private Scanner input;
-	//private Formatter output;
 	
 	private BufferedReader input;
 	private BufferedWriter output;
 	
 	private String name;
-	//private int playerNumber;
-	//private boolean suspended = true;
 
 	public Player(Socket connection) throws IOException {
 		this.connection = connection;
 		
-		//try {
-			//input = new Scanner(connection.getInputStream());
-			input = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+		input = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+		output = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
 			
-			//output = new Formatter(connection.getOutputStream());
-			output = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
-			
-			loginChecker(input.readLine(), input.readLine());
-			
-			/*name = input.readLine();
-			if (!name.startsWith("LOGIN:"))
-				throw new IOException("No login received from client");
-			name = name.substring(6);*/
-		//} catch (IOException ioE) {
-			//ioE.printStackTrace();
-			
-		
+		loginChecker(input.readLine(), input.readLine());		
 	}
 	
 	public void close() throws IOException {
@@ -72,7 +53,7 @@ public class Player {
 			throw new IOException("No login/register received from client");
 		
 		if (username.startsWith("SENDLOGIN:") && pass.startsWith("SENDLOGIN:")) {
-			boolean login = true;	//mï¿½ skiftes til false nï¿½r databasen har funksjoner for login
+			boolean login = true;	//må skiftes til false når databasen har funksjoner for login
 			
 			name = username.substring(10);
 			
@@ -86,7 +67,7 @@ public class Player {
 			}	
 		} 
 		else if (username.startsWith("SENDREGISTER:") && pass.startsWith("SENDREGISTER:")){
-			boolean register = true; //mï¿½ skiftes til false nï¿½r databasen har funksjoner for registering.
+			boolean register = true; //må skiftes til false når databasen har funksjoner for registering.
 			
 			name = username.substring(13);
 			
@@ -103,14 +84,6 @@ public class Player {
 	}
 	
 	/*
-	public void setSuspended(boolean status) {
-		suspended = status;
-	}
-	
-	public boolean online() {
-		return true; 
-	}
-	
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
