@@ -124,14 +124,13 @@ public class LoginClient extends JFrame {
 				
 		try {
 			sendLogin("SENDLOGIN:" + textUsername, "SENDLOGIN:" + textPassword);
+			int n = input.read();
 			//Når en connection er established ser server etter to strenger. Passord og brukernavn
-			if (input.ready()) {	//Logger inn, hvis true
-				int n = input.read();
-				if (n > 0) {
+			if (n > 0) {	//Logger inn, hvis true
 				setVisible(false);
 				LudoClient client = new LudoClient(LudoClienthost, connection, output, input, n);
 				client.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
-				}
+				
 			}
 			else JOptionPane.showMessageDialog(null, "Wrong password or username. Please try again");
 					
