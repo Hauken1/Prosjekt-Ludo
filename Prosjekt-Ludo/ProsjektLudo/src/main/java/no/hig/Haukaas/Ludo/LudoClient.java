@@ -2,6 +2,7 @@ package no.hig.Haukaas.Ludo;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -38,6 +39,8 @@ import globalServer.Player;
 
 public class LudoClient extends JFrame {
 	private String ludoClientHost; //host name for server
+	private Socket connection;
+	private int playerID;
 	private JTextArea displayArea; //Displays chat/messages from the server
 	private JPanel kommunikasjon;
 	private JPanel spillBord;
@@ -45,12 +48,12 @@ public class LudoClient extends JFrame {
     private JTextField textToSend;
     private JList<String> participants;
     private DefaultListModel<String> participantsModel;
-    
     private BufferedWriter output;
     private BufferedReader input;
-    private Socket connection;
-    
     private ExecutorService executorService;
+	private JPanel GUI;
+	private JButton spillEtSpillButton;
+	private JButton chatButton;
 	
     /**
 	 * Constructor for the Ludo client. 
@@ -60,35 +63,60 @@ public class LudoClient extends JFrame {
 	 * @param socket	Connection to the server
 	 * @param spillerID	PlayerID retrived from the Database.
 	 */
-	public LudoClient(String host, Socket connection, BufferedWriter output, BufferedReader input) {
+	public LudoClient(String host, Socket socket, BufferedWriter writer, BufferedReader reader, int spillerID) {
 		super("Ludo Klient");
-		this.ludoClientHost = host;
-		this.connection = connection;
-		this.output = output;
-		this.input = input;
 		
-		//spillBord = new JPanel();
-		//kommunikasjon = new JPanel();
+		output = writer;
+		input = reader;
+		ludoClientHost = host;
+		connection = socket;
+		playerID = spillerID;
+		
+		setUpGUILudoClient();
+					
+		setSize(1000, 1000);
+		setVisible(true);		
+	}
+	
+	public void run() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public void doSpillButtonListener() {
+		setVisible(false);
+		GameClient gameClient;
+		gameClient = new GameClient(ludoClientHost, connection, playerID);
+		gameClient.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	}
+	public void setUpGUILudoClient() {
+		GUI = new JPanel();
 		
 		displayArea = new JTextArea(4, 30);
 		displayArea.setEditable(true);
 		add(new JScrollPane(displayArea), BorderLayout.SOUTH);
 		
-		try {	//Prøver å lage spill bordet
-			LudoBoard board = new LudoBoard();
-			add(board, BorderLayout.CENTER);
-		} catch (Exception e) {
-			System.out.println("Noe feil med brettet");
-		}
+		spillEtSpillButton = new JButton("Spill");
+		spillEtSpillButton.setPreferredSize(new Dimension(300,300));
+		ActionListener spillButtonListener = new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				doSpillButtonListener();
+			}
+		};
+		spillEtSpillButton.addActionListener(spillButtonListener);
+		GUI.add(spillEtSpillButton);
 		
-		//boardPanel = new JPanel(); //Kan brukes for å vise spillet
-		//boardPanel.setLayout(new GridLayout(3,3,0,0));	//Setter hvordan panelet skal se ut
-			
-		//idField = new JTextField(); //Set ut textfield
-		//idField.setEditable(false);
-		//add(idField, BorderLayout.NORTH);		
-		//panel.add(boardPanel, BorderLayout.CENTER); 
-		//add(kommunikasjon);
+		chatButton = new JButton("Chat");
+		chatButton.setPreferredSize(new Dimension(300,300));	//Overdrevent, I know
+		ActionListener chatButtonListener = new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				//TODO Petter
+			}
+		};
+		chatButton.addActionListener(chatButtonListener);
+		GUI.add(chatButton);
+		
+		add(GUI, BorderLayout.NORTH);
 		
 		// Set up the textarea used to display all messages
         dialog = new JTextArea();
@@ -122,13 +150,10 @@ public class LudoClient extends JFrame {
                 sendText(">>>LOGOUT<<<");
             }
         });
-        setSize(600, 400);
-        setVisible(true);
         
 		executorService = Executors.newCachedThreadPool();
 		processConnection();
-		executorService.shutdown();
-		
+		executorService.shutdown();	
 	}
 	
 	private void processConnection() {
