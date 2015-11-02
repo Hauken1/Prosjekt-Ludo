@@ -23,11 +23,13 @@ public class GameClient extends JFrame {
 	private BufferedWriter output;
     private BufferedReader input;
     private ExecutorService executorService;
+    private int lastDiceValue;
     
     private final String throwDiceText;
     private final String receiveDiceText;
     private final String turnOwnerText;
-	
+    private final String makeMoveText;
+    
 	private JButton throwDiceButton;
 	private int turnOwner;
 	
@@ -42,6 +44,7 @@ public class GameClient extends JFrame {
 		throwDiceText = "THROWDICE:";
 		receiveDiceText = "RECEIVEDICE:";
 		turnOwnerText = "TURNOWNER:";
+		makeMoveText = "MOVE:";
 		
 		throwDiceButton = new JButton("Throw dice");
 		throwDiceButton.setBounds(10, 80, 50, 25);
@@ -81,9 +84,14 @@ public class GameClient extends JFrame {
 	                String tmp = input.readLine();
 	                if (tmp.startsWith(receiveDiceText)) { // Receives the dice numbers
 	                    receiveDice(tmp.substring(receiveDiceText.length()));
+	                    
 	                } else if (tmp.startsWith(turnOwnerText)) {
 	                	turnOwner(tmp.substring(turnOwnerText.length()));
-	                }
+	                	
+	                } else if (tmp.startsWith(makeMoveText)) {
+	                	makeMove(tmp.substring(makeMoveText.length()));
+	                	
+	                } 
 	                
 	            } catch (IOException ioe) {
 	                JOptionPane.showMessageDialog(this, "Error receiving data: " + ioe);
@@ -93,16 +101,22 @@ public class GameClient extends JFrame {
 	}
 	
 	private void receiveDice(String value) {
-		Integer diceValue = new Integer(value);
+		lastDiceValue = new Integer(value);
 		
 		//Shows the message to the player.
 		if (turnOwner == spiller) {
-			displayMessage("You got " + diceValue + ".\n");
+			displayMessage("You got " + lastDiceValue + ".\n");
 		} else {
-			displayMessage("Player " + turnOwner + " got " + diceValue + ".\n");
+			displayMessage("Player " + turnOwner + " got " + lastDiceValue + ".\n");
 		}
 		
-		//Choose the piece you want to move.
+		//TODO:Choose the piece you want to move.
+		//TODO:If valid tell the server so the other players will know.
+		//sendText(makeMoveText + theMovement);
+	}
+	
+	private void makeMove(String piece) {
+		//TODO:Move the piece that was broadcasted from the server
 	}
 	
 	/**
