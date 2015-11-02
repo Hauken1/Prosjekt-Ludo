@@ -86,12 +86,12 @@ public class GlobalServer extends JFrame{
 							try {
 								String msg = p.read();
 								
-								if (msg.startsWith(throwDiceText)) {
+								if (msg != null && msg.startsWith(throwDiceText)) {
 									//TODO:Check received id with correct id (not really needed, but why not)
 									//TODO:Send the dice value to the clients
 									//messages.put(receiveDiceText + diceValue);
 									
-								} else if (msg.startsWith(makeMoveText)) {
+								} else if (msg != null && msg.startsWith(makeMoveText)) {
 									//TODO:Send a broadcast to every player about the move
 									messages.put(msg.substring(makeMoveText.length()));
 									
