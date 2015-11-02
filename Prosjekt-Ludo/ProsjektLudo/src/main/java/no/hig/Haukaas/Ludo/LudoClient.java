@@ -80,7 +80,7 @@ public class LudoClient extends JFrame {
 	public void doSpillButtonListener() {
 		setVisible(false);
 		GameClient gameClient;
-		gameClient = new GameClient(ludoClientHost, connection, playerID);
+		gameClient = new GameClient(ludoClientHost, connection, playerID, output, input);
 		gameClient.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 	
