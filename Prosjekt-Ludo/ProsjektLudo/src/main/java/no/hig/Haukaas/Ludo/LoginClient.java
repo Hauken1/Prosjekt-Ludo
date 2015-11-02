@@ -187,6 +187,7 @@ public class LoginClient extends JFrame {
 			return false;
 		}
 	}
+	
 	void setUpGUILoginClient() {
 		
 		panel = new JPanel(); 

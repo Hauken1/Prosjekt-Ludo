@@ -55,7 +55,14 @@ public class ChatClient extends JFrame{
 			public void actionPerformed(ActionEvent event) {
 				groupChatName = JOptionPane.showInputDialog("Group chat name");
 				if (groupChatName != null || !groupChatName.equals("")) {
-					// do something with the name
+					sendText("NEWGROUPCHAT:" + groupChatName);
+					try {
+						if(processChatRequest(input.readLine())) {
+							// new chat
+						}
+					} catch (IOException ioe) {
+						ioe.printStackTrace();
+					}
 				}
 					
 				
@@ -104,6 +111,14 @@ public class ChatClient extends JFrame{
 		setVisible(true);
 	}
 	
+	private boolean processChatRequest(String login) {
+		if (login.equals("ERRORCHAT")) {
+			JOptionPane.showMessageDialog(null, "User already exists. Please try again");
+			return false;
+		}
+		return true;
+	}
+	
 	private void processConnection() {
 		executorService.execute(() -> {
 			while (true) {
@@ -113,6 +128,7 @@ public class ChatClient extends JFrame{
 	                    addUser(tmp.substring(6));
 	                } else if (tmp.startsWith("LOGOUT:")) { // User is logging out
 	                    removeUser(tmp.substring(7));
+	                
 	                } else { // All other messages
 	                    displayMessage(tmp + "\n");
 	                }

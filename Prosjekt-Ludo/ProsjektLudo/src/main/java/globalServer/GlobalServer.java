@@ -4,6 +4,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.awt.List;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -28,6 +29,8 @@ public class GlobalServer extends JFrame{
 	
 	private ArrayBlockingQueue<String> messages = new ArrayBlockingQueue<String>(50);
 	
+	private ArrayList<String> groupChatList = new ArrayList<String>();
+	
 	private boolean shutdown = false;
 	
 	public GlobalServer() {
@@ -45,6 +48,7 @@ public class GlobalServer extends JFrame{
 			executorService = Executors.newCachedThreadPool();
 			
 			startLoginMonitor();
+			groupChatMonitor();
 			startMessageSender();
 			startMessageListener();
 			
@@ -144,6 +148,33 @@ public class GlobalServer extends JFrame{
 				} catch (IOException ioe) {
 					displayMessage("CONNECTION ERROR: " + ioe + "\n");
 				}
+			}
+		});
+	}
+	
+	private void groupChatMonitor() {
+		executorService.execute(() -> {
+			while (!shutdown) {
+				
+					synchronized(player) {
+						Iterator<Player> i = player.iterator();
+						while (i.hasNext()) {
+							Player p = i.next();
+							try {
+								String msg = p.read();
+								if (msg != null && msg.equals("NEWGROUPCHAT:") && !groupChatList.contains(msg.substring(13))) {
+									groupChatList.add(msg.substring(13));
+									displayMessage("New chat room: " + msg.substring(13) + " made by: " + p.returnName() + "\n");
+								} else if (groupChatList.contains(msg.substring(13))) {
+									p.sendText("ERRORCHAT");
+								}
+								
+							} catch (IOException ioe) {
+								ioe.printStackTrace();
+							}
+						}
+					}
+				
 			}
 		});
 	}
