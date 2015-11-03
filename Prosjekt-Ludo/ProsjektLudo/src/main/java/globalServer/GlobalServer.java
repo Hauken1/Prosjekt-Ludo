@@ -4,6 +4,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.awt.List;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -28,7 +29,14 @@ public class GlobalServer extends JFrame{
 	
 	private ArrayBlockingQueue<String> messages = new ArrayBlockingQueue<String>(50);
 	
+	private ArrayList<String> groupChatList = new ArrayList<String>();
+	
 	private boolean shutdown = false;
+	
+	private final String throwDiceText;
+    private final String receiveDiceText;
+    private final String turnOwnerText;
+    private final String makeMoveText;
 	
 	public GlobalServer() {
 		
@@ -40,11 +48,20 @@ public class GlobalServer extends JFrame{
 		add(new JScrollPane(outputArea), BorderLayout.CENTER);
 		outputArea.setText("Server awaiting connections\n");
 		
+		//The commands that will be received from the gameClient
+		throwDiceText = "THROWDICE:"; //Request for a dice value
+		makeMoveText = "MOVE:"; //Announce which piece moved
+		
+		//The commands that will be sent to the gameClient
+		receiveDiceText = "RECEIVEDICE:"; //Return the dice value
+		turnOwnerText = "TURNOWNER:"; //Announce who has the turn
+		
 		try {
 			server = new ServerSocket(12347); // Set up serverSocket
 			executorService = Executors.newCachedThreadPool();
 			
 			startLoginMonitor();
+			groupChatMonitor();
 			startMessageSender();
 			startMessageListener();
 			
@@ -68,7 +85,17 @@ public class GlobalServer extends JFrame{
 							Player p = i.next();
 							try {
 								String msg = p.read();
-								if (msg != null && !msg.equals(">>>LOGOUT<<<"))
+								
+								if (msg != null && msg.startsWith(throwDiceText)) {
+									//TODO:Check received id with correct id (not really needed, but why not)
+									//TODO:Send the dice value to the clients
+									//messages.put(receiveDiceText + diceValue);
+									
+								} else if (msg != null && msg.startsWith(makeMoveText)) {
+									//Send a broadcast to every player about the move
+									messages.put(msg);
+									
+								} else if (msg != null && !msg.equals(">>>LOGOUT<<<"))
 									messages.put(p.returnName() + "> " + msg);
 								else if (msg != null) {
 									i.remove();
@@ -78,7 +105,7 @@ public class GlobalServer extends JFrame{
 							} catch (IOException ioe) {
 								i.remove();
 								messages.put("LOGOUT:" + p.returnName());
-								messages.put(p.returnName() + " got lost in hyperspacve");
+								messages.put(p.returnName() + " got lost in hyperspace");
 							}
 						}
 					}
@@ -144,6 +171,33 @@ public class GlobalServer extends JFrame{
 				} catch (IOException ioe) {
 					displayMessage("CONNECTION ERROR: " + ioe + "\n");
 				}
+			}
+		});
+	}
+	
+	private void groupChatMonitor() {
+		executorService.execute(() -> {
+			while (!shutdown) {
+				
+					synchronized(player) {
+						Iterator<Player> i = player.iterator();
+						while (i.hasNext()) {
+							Player p = i.next();
+							try {
+								String msg = p.read();
+								if (msg != null && msg.equals("NEWGROUPCHAT:") && !groupChatList.contains(msg.substring(13))) {
+									groupChatList.add(msg.substring(13));
+									displayMessage("New chat room: " + msg.substring(13) + " made by: " + p.returnName() + "\n");
+								} else if (groupChatList.contains(msg.substring(13))) {
+									p.sendText("ERRORCHAT");
+								}
+								
+							} catch (IOException ioe) {
+								ioe.printStackTrace();
+							}
+						}
+					}
+				
 			}
 		});
 	}
