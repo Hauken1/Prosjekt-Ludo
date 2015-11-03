@@ -92,8 +92,8 @@ public class GlobalServer extends JFrame{
 									//messages.put(receiveDiceText + diceValue);
 									
 								} else if (msg != null && msg.startsWith(makeMoveText)) {
-									//TODO:Send a broadcast to every player about the move
-									messages.put(msg.substring(makeMoveText.length()));
+									//Send a broadcast to every player about the move
+									messages.put(msg);
 									
 								} else if (msg != null && !msg.equals(">>>LOGOUT<<<"))
 									messages.put(p.returnName() + "> " + msg);
