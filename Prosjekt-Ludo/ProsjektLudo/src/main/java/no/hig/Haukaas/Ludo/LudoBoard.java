@@ -90,6 +90,7 @@ public class LudoBoard extends JPanel {
 			//testDraw = ImageIO.read(new File("bluePawn1.png"));
 			//setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 			ImageIcon boardBackground = new ImageIcon(getClass().getResource("ludo_Board.png"));
+			ImageIcon gameBoard = resizeImageIcon(boardBackground, 1000, 900);
 			//ImageIcon boardBackground = createImageIcon("ludoBoard.png");
 			ImageIcon greenPawnIcon = new ImageIcon(getClass().getResource("greenPawn1.png"));
 			ImageIcon yellowPawnIcon = new ImageIcon(getClass().getResource("yellowPawn1.png"));
@@ -102,7 +103,7 @@ public class LudoBoard extends JPanel {
 			boardPane.setOpaque(true);
 			boardPane.setBackground(color[7]);
 			board = new JLabel();	//Board Label
-			board.setIcon(boardBackground);	//Sets the boardBackground
+			board.setIcon(gameBoard);	//Sets the boardBackground
 			boardPane.add(board, new Integer(0));
 			boardSize = board.getPreferredSize();	
 			board.setBounds(0, 0, boardSize.width, boardSize.height); //Gives the image some extra space
@@ -288,6 +289,15 @@ public class LudoBoard extends JPanel {
 		}
 	}
 	*/
+	
+	public static ImageIcon resizeImageIcon(ImageIcon icon, Integer width, Integer height) {
+		BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TRANSLUCENT);
+		Graphics g2d = bufferedImage.createGraphics();
+		g2d.drawImage(icon.getImage(), 0, 0, width, height, null);
+		g2d.dispose();
+		
+		return new ImageIcon(bufferedImage, icon.getDescription());
+	}
 	
 	public void paint(Graphics g){
 		super.paint(g);
