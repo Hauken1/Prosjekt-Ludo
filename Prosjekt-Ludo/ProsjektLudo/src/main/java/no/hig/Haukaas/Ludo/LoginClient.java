@@ -43,8 +43,8 @@ public class LoginClient extends JFrame {
 	private JButton loginButton;
 	private JButton registerButton;
 	private Socket connection; //connection to server
-	private BufferedWriter output; //input from server
-	private BufferedReader input; //output to server
+	private BufferedWriter output; //output from server
+	private BufferedReader input; //input to server
 	
 	/**
 	 * Constructor for the login Client. Makes necessary objects/elements
@@ -67,10 +67,6 @@ public class LoginClient extends JFrame {
      * changed for a production version. Once the socket connection is
      * established a bufferedReader and a bufferedWriter is created, this is our
      * input and output.
-     * 
-     * Once connected the user is asked to provide a nickname to be used
-     * throughout the session. A login message is then sent to the server with
-     * that nickname.
      */
     public void connect() {
         try {
@@ -90,14 +86,11 @@ public class LoginClient extends JFrame {
     }
     
     /**
-     * Connects to the server, on port 12345 and localhost. This would be
+     * Re connects to the server, on port 12345 and localhost. This would be
      * changed for a production version. Once the socket connection is
      * established a bufferedReader and a bufferedWriter is created, this is our
      * input and output.
      * 
-     * Once connected the user is asked to provide a nickname to be used
-     * throughout the session. A login message is then sent to the server with
-     * that nickname.
      */
     public void reconnect() {
         try {
@@ -115,6 +108,12 @@ public class LoginClient extends JFrame {
         }
     }
     
+    /**
+     * Sends two given String's to the server. So data the username and passord can
+     * be checked up against the database
+     * @param username to be sent
+     * @param password to be sent
+     */
     private void sendInfo(String username, String password) {
         try {
             output.write(username);
@@ -137,16 +136,16 @@ public class LoginClient extends JFrame {
 		String textUsername = userType.getText();
 		String textPassword = passType.getText();
 		
+			// Makes sure that something is writen in
 		if (textUsername != null && !textUsername.equals("") &&
 				textPassword != null && !textPassword.equals("")) {
 		
 			try {
-				sendInfo("SENDLOGIN:" + textUsername, "SENDLOGIN:" + textPassword);
-				int n = input.read();
-				if (n == 0) {
-					reconnect();
+				sendInfo("SENDLOGIN:" + textUsername, "SENDLOGIN:" + textPassword);	// send username and passord to server
+				int n = input.read();	// reads the respons from the server
+				if (n == 0) {	//if wrong
+					reconnect();	//reconnets to the server
 				}
-				//Når en connection er established ser server etter to strenger. Passord og brukernavn
 				if (n > 0) {	//Logger inn, hvis true
 					setVisible(false);
 					LudoClient client = new LudoClient(LudoClienthost, connection, output, input, n);
@@ -186,14 +185,15 @@ public class LoginClient extends JFrame {
   			String textUsername = user.getText();
   			String textPassword = pass.getText();
   					
+  				// Makes sure that something is writen in
   			if (textUsername != null && !textUsername.equals("") &&
   					textPassword != null && !textPassword.equals("")) {
   	  			try {
-	  				sendInfo("SENDREGISTER:" + textUsername, "SENDREGISTER:" + textPassword);
-	  				if(processLogin(input.readLine())) 
+	  				sendInfo("SENDREGISTER:" + textUsername, "SENDREGISTER:" + textPassword); // sends username nad password to server
+	  				if(processLogin(input.readLine())) // Checks the server respons
 	  					JOptionPane.showMessageDialog(null, "Account created. Login to play Ludo");
 	  				else
-	  					reconnect();
+	  					reconnect();	// reconnect to the server if declined by the server
 	  			} catch (Exception e1) {
 	  				JOptionPane.showMessageDialog(null, "Register went wrong. Please try again");
 	  			}
@@ -212,12 +212,6 @@ public class LoginClient extends JFrame {
 			JOptionPane.showMessageDialog(null, "User already exists. Please try again");
 			return false;
 		}
-	}
-	
-	private void close() throws IOException {
-		input.close();
-		output.close();
-		connection.close();
 	}
 	
 	void setUpGUILoginClient() {
