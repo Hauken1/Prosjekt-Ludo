@@ -42,6 +42,8 @@ public class GlobalServer extends JFrame{
 		
 		super("GlobalServer");
 		
+		groupChatList.add("Globa");
+		
 		outputArea = new JTextArea();
 		outputArea.setFont(new Font("Ariel", Font.PLAIN, 14));
 		outputArea.setEditable(false);
@@ -61,11 +63,12 @@ public class GlobalServer extends JFrame{
 			executorService = Executors.newCachedThreadPool();
 			
 			startLoginMonitor();
-			groupChatMonitor();
+			//groupChatMonitor();
 			startMessageSender();
 			startMessageListener();
 			
 			executorService.shutdown();
+			
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 			System.exit(1);
@@ -85,6 +88,12 @@ public class GlobalServer extends JFrame{
 							Player p = i.next();
 							try {
 								String msg = p.read();
+								if (msg != null && msg.startsWith("NEWGROUPCHAT:")) {
+									groupChatList.add(msg.substring(13));
+									displayMessage("New chat room: " + msg.substring(13) + " made by: " + p.returnName() + "\n");
+								}
+								else if (msg != null && groupChatList.contains(msg.substring(0, 5)))
+									messages.put(msg.substring(0, 5) + p.returnName() + "> " + msg.substring(5));
 								
 								if (msg != null && msg.startsWith(throwDiceText)) {
 									//TODO:Check received id with correct id (not really needed, but why not)
@@ -94,9 +103,7 @@ public class GlobalServer extends JFrame{
 								} else if (msg != null && msg.startsWith(makeMoveText)) {
 									//Send a broadcast to every player about the move
 									messages.put(msg);
-									
-								} else if (msg != null && !msg.equals(">>>LOGOUT<<<"))
-									messages.put(p.returnName() + "> " + msg);
+								}
 								else if (msg != null) {
 									i.remove();
 									messages.put("LOGOUT:" + p.returnName());
@@ -148,8 +155,50 @@ public class GlobalServer extends JFrame{
 				try {
 					Socket s = server.accept();
 					Player p = new Player(s);
-					messages.add(p.returnName() + " joined the conversation");
+					if (p.loginChecker()) {
+						messages.add(p.returnName() + " joined the conversation");
+						synchronized (player) {
+							
+							player.add(p);
+							Iterator<Player> i = player.iterator();
+							while (i.hasNext()) {
+								Player p1 = i.next();
+								if (p != p1)
+									try  {
+										p.sendText("LOGIN:" + p1.returnName());
+									} catch (IOException ioe) {
+										// Lost connection
+									}
+							}
+							
+						}
+						displayMessage("PLAYER CONNECTED:" + p.returnName() + "\n");
+						try {
+							messages.put("LOGIN:" + p.returnName());
+						} catch (InterruptedException ie) {
+							ie.printStackTrace();
+						}
+					} else
+						executorService.shutdown();
+				} catch (IOException ioe) {
+					displayMessage("CONNECTION ERROR: " + ioe + "\n");
+				}
+			}
+		});
+	}
+	
+	/*
+	 
+	 private void startLoginMonitor() {
+		executorService.execute(() -> {
+			while (!shutdown) {
+				try {
+					Socket s = server.accept();
+					Player p = new Player(s);
+					
+					//messages.add(p.returnName() + " joined the conversation");
 					synchronized (player) {
+						if (p.loginChecker()) {
 						player.add(p);
 						Iterator<Player> i = player.iterator();
 						while (i.hasNext()) {
@@ -161,6 +210,7 @@ public class GlobalServer extends JFrame{
 									// Lost connection
 								}
 						}
+						}
 					}
 					displayMessage("PLAYER CONNECTED:" + p.returnName() + "\n");
 					try {
@@ -168,24 +218,27 @@ public class GlobalServer extends JFrame{
 					} catch (InterruptedException ie) {
 						ie.printStackTrace();
 					}
+					
 				} catch (IOException ioe) {
 					displayMessage("CONNECTION ERROR: " + ioe + "\n");
 				}
 			}
 		});
 	}
-	
+	 
+	 
+	 
+	 
 	private void groupChatMonitor() {
 		executorService.execute(() -> {
 			while (!shutdown) {
-				
 					synchronized(player) {
 						Iterator<Player> i = player.iterator();
 						while (i.hasNext()) {
 							Player p = i.next();
 							try {
 								String msg = p.read();
-								if (msg != null && msg.equals("NEWGROUPCHAT:") && !groupChatList.contains(msg.substring(13))) {
+								if (msg != null && msg.startsWith("NEWGROUPCHAT:") && !groupChatList.contains(msg.substring(13))) {
 									groupChatList.add(msg.substring(13));
 									displayMessage("New chat room: " + msg.substring(13) + " made by: " + p.returnName() + "\n");
 								} else if (groupChatList.contains(msg.substring(13))) {
@@ -201,6 +254,7 @@ public class GlobalServer extends JFrame{
 			}
 		});
 	}
+	*/
 	
 	private void displayMessage(String text) {
 		SwingUtilities.invokeLater(() -> outputArea.append(text));

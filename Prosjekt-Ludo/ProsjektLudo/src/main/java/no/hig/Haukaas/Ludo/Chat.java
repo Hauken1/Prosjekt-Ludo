@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.swing.DefaultListModel;
+import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
@@ -19,7 +20,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-public class Chat {
+public class Chat extends JFrame {
 
 	private JTextArea dialog;
     private JTextField textToSend;
@@ -31,29 +32,29 @@ public class Chat {
     private Container frame;
     private String chatName;
 	
-	public Chat(BufferedWriter writer, BufferedReader reader, Container frame, String name) {
+	public Chat(BufferedWriter writer, BufferedReader reader, String name) {
+		super(name);
 		this.output = writer;
 		this.input = reader;
-		this.frame = frame;
 		this.chatName = name;
 		
 		// Set up the textarea used to display all messages
 	    dialog = new JTextArea();
 	    dialog.setEditable(false);
 	    dialog.setFont(new Font("Arial", Font.PLAIN, 26));
-	    frame.add(new JScrollPane(dialog), BorderLayout.WEST);
+	    add(new JScrollPane(dialog), BorderLayout.CENTER);
 
 	    // Set up the list of participants
 	    participants = new JList<String>(
 	            participantsModel = new DefaultListModel<String>());
 	    participants.setFixedCellWidth(160);
 	    participants.setFont(new Font("Arial", Font.PLAIN, 26));
-	    frame.add(new JScrollPane(participants), BorderLayout.EAST);
+	    add(new JScrollPane(participants), BorderLayout.EAST);
 
 	    // Set up the textfield used to enter text to send
 	    textToSend = new JTextField();
 	    textToSend.setFont(new Font("Arial", Font.PLAIN, 26));
-	    frame.add(textToSend, BorderLayout.SOUTH);
+	    add(textToSend, BorderLayout.SOUTH);
 	    // Add an actionlistener to the textfield
 	    textToSend.addActionListener(e -> {
 	        sendText(e.getActionCommand());
@@ -61,9 +62,19 @@ public class Chat {
 	    });
 	    textToSend.requestFocus();
 	    
+	    addWindowListener(new WindowAdapter() {
+	    	@Override
+	    	public void windowClosing(WindowEvent e) {
+	    		sendText("LOGOUT:" + chatName.substring(0, 5));
+	    	}
+		});
+	    
 		executorService = Executors.newCachedThreadPool();
 		processConnection();
 		executorService.shutdown();
+		
+		setSize(600, 400);
+		setVisible(true);
 		
 	}
 	
@@ -73,15 +84,15 @@ private void processConnection() {
 		while (true) {
 			try {
                 String tmp = input.readLine();
-                if (tmp.startsWith("LOGIN:")) { // User is logging in
-                    addUser(tmp.substring(6));
-                } else if (tmp.startsWith("LOGOUT:")) { // User is logging out
-                    removeUser(tmp.substring(7));
+                if (tmp.startsWith(chatName + "IN:")) { // User is logging in
+                    addUser(tmp.substring(chatName.length() + 3));
+                } else if (tmp.startsWith(chatName + "OUT:")) { // User is logging out
+                    removeUser(tmp.substring(chatName.length() + 4));
                 } else { // All other messages
                     displayMessage(tmp + "\n");
                 }
             } catch (IOException ioe) {
-                JOptionPane.showMessageDialog(frame, "Error receiving data: " + ioe);
+                JOptionPane.showMessageDialog(this, "Error receiving data: " + ioe);
             }
 		}
 	});
@@ -134,7 +145,11 @@ private void sendText(String textToSend) {
         output.flush();
     } catch (IOException ioe) {
         JOptionPane
-                .showMessageDialog(frame, "Error sending message: " + ioe);
+                .showMessageDialog(this, "Error sending message: " + ioe);
     }
+}
+
+public String returnName() {
+	return chatName;
 }
 }

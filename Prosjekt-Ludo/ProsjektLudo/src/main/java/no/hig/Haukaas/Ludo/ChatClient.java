@@ -1,6 +1,7 @@
 package no.hig.Haukaas.Ludo;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -30,11 +32,13 @@ public class ChatClient extends JFrame{
 	private Socket connection;
 	private JTextArea dialog;
     private JTextField textToSend;
-    private JList<String> participants;
-    private DefaultListModel<String> participantsModel;
+    private JList<String> chatGroups;
+    private DefaultListModel<String> chatGroupsModel;
     private BufferedWriter output;
     private BufferedReader input;
     private ExecutorService executorService;
+    
+    private ArrayList<Chat> chat = new ArrayList<Chat>();
     
     private JButton newChatGroup;
     private String groupChatName;
@@ -46,62 +50,40 @@ public class ChatClient extends JFrame{
 		this.output = writer;
 		this.input = reader;
 		
-		newChatGroup = new JButton("newChatGroup");
-		newChatGroup.setBounds(10, 80, 50, 25);
+		Chat mainChat = new Chat(output, input, "GlobalChatRoom");
+		chat.add(mainChat);
+		addUser(mainChat.returnName());
+		
+		newChatGroup = new JButton("New chat group");
+		newChatGroup.setPreferredSize(new Dimension(50, 50));
 		add(newChatGroup, BorderLayout.NORTH);
 		
 		ActionListener chatButtonListener = new ActionListener() {
 			
 			public void actionPerformed(ActionEvent event) {
 				groupChatName = JOptionPane.showInputDialog("Group chat name");
-				if (groupChatName != null || !groupChatName.equals("")) {
-					sendText("NEWGROUPCHAT:" + groupChatName);
+				if (groupChatName != null && !groupChatName.equals("")) {
+					sendText("NEWGROUPCHAT:" + groupChatName.substring(0, 5));
 					try {
 						if(processChatRequest(input.readLine())) {
-							// new chat
+							Chat c = new Chat(output, input, groupChatName);
+							chat.add(c);
+							addUser(c.returnName());
 						}
 					} catch (IOException ioe) {
 						ioe.printStackTrace();
 					}
-				}
 					
-				
+				}
 			}		
 		}; 
 		newChatGroup.addActionListener(chatButtonListener);
 		
-		// Set up the textarea used to display all messages
-        dialog = new JTextArea();
-        dialog.setEditable(false);
-        dialog.setFont(new Font("Arial", Font.PLAIN, 26));
-        add(new JScrollPane(dialog), BorderLayout.CENTER);
-
         // Set up the list of participants
-        participants = new JList<String>(
-                participantsModel = new DefaultListModel<String>());
-        participants.setFixedCellWidth(160);
-        participants.setFont(new Font("Arial", Font.PLAIN, 26));
-        add(new JScrollPane(participants), BorderLayout.EAST);
-
-        // Set up the textfield used to enter text to send
-        textToSend = new JTextField();
-        textToSend.setFont(new Font("Arial", Font.PLAIN, 26));
-        add(textToSend, BorderLayout.SOUTH);
-        // Add an actionlistener to the textfield
-        textToSend.addActionListener(e -> {
-            sendText(e.getActionCommand());
-            textToSend.setText("");
-        });
-        textToSend.requestFocus();
-
-        // Add a window listener, this sends a message indicating
-        // to the server that the user is leaving (logging out)
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                sendText(">>>LOGOUT<<<");
-            }
-        });
+        chatGroups = new JList<String>(chatGroupsModel = new DefaultListModel<String>());
+        chatGroups.setFixedCellWidth(160);
+        chatGroups.setFont(new Font("Arial", Font.PLAIN, 14));
+        add(new JScrollPane(chatGroups), BorderLayout.EAST);
         
 		executorService = Executors.newCachedThreadPool();
 		processConnection();
@@ -111,9 +93,9 @@ public class ChatClient extends JFrame{
 		setVisible(true);
 	}
 	
-	private boolean processChatRequest(String login) {
-		if (login.equals("ERRORCHAT")) {
-			JOptionPane.showMessageDialog(null, "User already exists. Please try again");
+	private boolean processChatRequest(String respons) {
+		if (respons.equals("ERRORCHAT")) {
+			JOptionPane.showMessageDialog(null, "Chat group already exits");
 			return false;
 		}
 		return true;
@@ -124,14 +106,9 @@ public class ChatClient extends JFrame{
 			while (true) {
 				try {
 	                String tmp = input.readLine();
-	                if (tmp.startsWith("LOGIN:")) { // User is logging in
-	                    addUser(tmp.substring(6));
-	                } else if (tmp.startsWith("LOGOUT:")) { // User is logging out
-	                    removeUser(tmp.substring(7));
-	                
-	                } else { // All other messages
-	                    displayMessage(tmp + "\n");
-	                }
+	                if (tmp.startsWith("NEWCHAT:")) { 
+	                    addUser(tmp.substring(8));
+	                } 
 	            } catch (IOException ioe) {
 	                JOptionPane.showMessageDialog(this, "Error receiving data: " + ioe);
 	            }
@@ -156,7 +133,7 @@ public class ChatClient extends JFrame{
      *            the name of the user to remove from the list
      */
     private void removeUser(String username) {
-        SwingUtilities.invokeLater(() -> participantsModel
+        SwingUtilities.invokeLater(() -> chatGroupsModel
                 .removeElement(username));
     }
 
@@ -166,9 +143,9 @@ public class ChatClient extends JFrame{
      * @param username
      *            the name of the user to add to the list
      */
-    private void addUser(String username) {
+    private void addUser(String chatName) {
         SwingUtilities
-                .invokeLater(() -> participantsModel.addElement(username));
+                .invokeLater(() -> chatGroupsModel.addElement(chatName));
     }
 
     /**

@@ -70,6 +70,13 @@ public class LudoClient extends JFrame {
 					
 		setSize(1000, 1000);
 		setVisible(true);		
+		
+		addWindowListener(new WindowAdapter() {
+	    	@Override
+	    	public void windowClosing(WindowEvent e) {
+	    		sendText(">>>LOGOUT<<<");
+	    	}
+		});
 	}
 	
 	public void run() {
@@ -116,4 +123,23 @@ public class LudoClient extends JFrame {
 		add(GUI, BorderLayout.NORTH);
 		
 	}
+	
+	 /**
+     * Method used to send a message to the server. Handled in a separate method
+     * to ensure that all messages are ended with a newline character and are
+     * flushed (ensure they are sent.)
+     * 
+     * @param textToSend
+     *            the message to send to the server
+     */
+    private void sendText(String textToSend) {
+        try {
+            output.write(textToSend);
+            output.newLine();
+            output.flush();
+        } catch (IOException ioe) {
+            JOptionPane
+                    .showMessageDialog(this, "Error sending message: " + ioe);
+        }
+    }
 }
