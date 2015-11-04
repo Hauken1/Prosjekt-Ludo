@@ -33,6 +33,11 @@ public class GlobalServer extends JFrame{
 	
 	private boolean shutdown = false;
 	
+	private final String throwDiceText;
+    private final String receiveDiceText;
+    private final String turnOwnerText;
+    private final String makeMoveText;
+	
 	public GlobalServer() {
 		
 		super("GlobalServer");
@@ -44,6 +49,14 @@ public class GlobalServer extends JFrame{
 		outputArea.setEditable(false);
 		add(new JScrollPane(outputArea), BorderLayout.CENTER);
 		outputArea.setText("Server awaiting connections\n");
+		
+		//The commands that will be received from the gameClient
+		throwDiceText = "THROWDICE:"; //Request for a dice value
+		makeMoveText = "MOVE:"; //Announce which piece moved
+		
+		//The commands that will be sent to the gameClient
+		receiveDiceText = "RECEIVEDICE:"; //Return the dice value
+		turnOwnerText = "TURNOWNER:"; //Announce who has the turn
 		
 		try {
 			server = new ServerSocket(12347); // Set up serverSocket
@@ -81,6 +94,16 @@ public class GlobalServer extends JFrame{
 								}
 								else if (msg != null && groupChatList.contains(msg.substring(0, 5)))
 									messages.put(msg.substring(0, 5) + p.returnName() + "> " + msg.substring(5));
+								
+								if (msg != null && msg.startsWith(throwDiceText)) {
+									//TODO:Check received id with correct id (not really needed, but why not)
+									//TODO:Send the dice value to the clients
+									//messages.put(receiveDiceText + diceValue);
+									
+								} else if (msg != null && msg.startsWith(makeMoveText)) {
+									//Send a broadcast to every player about the move
+									messages.put(msg);
+								}
 								else if (msg != null) {
 									i.remove();
 									messages.put("LOGOUT:" + p.returnName());
@@ -89,7 +112,7 @@ public class GlobalServer extends JFrame{
 							} catch (IOException ioe) {
 								i.remove();
 								messages.put("LOGOUT:" + p.returnName());
-								messages.put(p.returnName() + " got lost in hyperspacve");
+								messages.put(p.returnName() + " got lost in hyperspace");
 							}
 						}
 					}
