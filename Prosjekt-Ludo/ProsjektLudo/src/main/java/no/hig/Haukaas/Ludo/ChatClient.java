@@ -85,13 +85,6 @@ public class ChatClient extends JFrame{
         chatGroups.setFont(new Font("Arial", Font.PLAIN, 14));
         add(new JScrollPane(chatGroups), BorderLayout.EAST);
         
-        addWindowListener(new WindowAdapter() {
-	    	@Override
-	    	public void windowClosing(WindowEvent e) {
-	    		sendText(">>>LOGOUT<<<");
-	    	}
-		});
-        
 		executorService = Executors.newCachedThreadPool();
 		processConnection();
 		executorService.shutdown();	

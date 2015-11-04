@@ -83,7 +83,7 @@ public class GlobalServer extends JFrame{
 									messages.put(msg.substring(0, 5) + p.returnName() + "> " + msg.substring(5));
 								else if (msg != null) {
 									i.remove();
-									messages.put("LOGOUT:" + msg.substring(0, 5)+ p.returnName());
+									messages.put("LOGOUT:" + p.returnName());
 									messages.put(p.returnName() + " logged out");
 								}
 							} catch (IOException ioe) {
@@ -132,8 +132,50 @@ public class GlobalServer extends JFrame{
 				try {
 					Socket s = server.accept();
 					Player p = new Player(s);
-					messages.add(p.returnName() + " joined the conversation");
+					if (p.loginChecker()) {
+						messages.add(p.returnName() + " joined the conversation");
+						synchronized (player) {
+							
+							player.add(p);
+							Iterator<Player> i = player.iterator();
+							while (i.hasNext()) {
+								Player p1 = i.next();
+								if (p != p1)
+									try  {
+										p.sendText("LOGIN:" + p1.returnName());
+									} catch (IOException ioe) {
+										// Lost connection
+									}
+							}
+							
+						}
+						displayMessage("PLAYER CONNECTED:" + p.returnName() + "\n");
+						try {
+							messages.put("LOGIN:" + p.returnName());
+						} catch (InterruptedException ie) {
+							ie.printStackTrace();
+						}
+					} else
+						executorService.shutdown();
+				} catch (IOException ioe) {
+					displayMessage("CONNECTION ERROR: " + ioe + "\n");
+				}
+			}
+		});
+	}
+	
+	/*
+	 
+	 private void startLoginMonitor() {
+		executorService.execute(() -> {
+			while (!shutdown) {
+				try {
+					Socket s = server.accept();
+					Player p = new Player(s);
+					
+					//messages.add(p.returnName() + " joined the conversation");
 					synchronized (player) {
+						if (p.loginChecker()) {
 						player.add(p);
 						Iterator<Player> i = player.iterator();
 						while (i.hasNext()) {
@@ -145,6 +187,7 @@ public class GlobalServer extends JFrame{
 									// Lost connection
 								}
 						}
+						}
 					}
 					displayMessage("PLAYER CONNECTED:" + p.returnName() + "\n");
 					try {
@@ -152,14 +195,17 @@ public class GlobalServer extends JFrame{
 					} catch (InterruptedException ie) {
 						ie.printStackTrace();
 					}
+					
 				} catch (IOException ioe) {
 					displayMessage("CONNECTION ERROR: " + ioe + "\n");
 				}
 			}
 		});
 	}
-	
-	/*
+	 
+	 
+	 
+	 
 	private void groupChatMonitor() {
 		executorService.execute(() -> {
 			while (!shutdown) {

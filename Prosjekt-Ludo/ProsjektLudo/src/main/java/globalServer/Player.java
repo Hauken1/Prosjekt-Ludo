@@ -21,9 +21,7 @@ public class Player {
 		this.connection = connection;
 		
 		input = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-		output = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
-			
-		loginChecker(input.readLine(), input.readLine());		
+		output = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));	
 	}
 	
 	public void close() throws IOException {
@@ -48,87 +46,57 @@ public class Player {
 		return name;
 	}
 	
-	private void loginChecker(String username, String pass) throws IOException {
-		
-		if (!username.startsWith("SENDLOGIN:") && !username.startsWith("SENDREGISTER:"))
-			throw new IOException("No login/register received from client");
-		
-		if (username.startsWith("SENDLOGIN:") && pass.startsWith("SENDLOGIN:")) {
-			int login = 0;
-			
-			name = username.substring(10);
-			password = pass.substring(10);
-						
-			login = DatabaseHandler.userLogin(name, password);
-			if(login > 0) {
-				output.write(login);
-				output.newLine();
-				output.flush();
-			}
-			else if (login == 0) {
-				output.write(login);
-				output.newLine();
-				output.flush();	
-			}
-		}
-		else if (username.startsWith("SENDREGISTER:") && pass.startsWith("SENDREGISTER:")){
-			boolean register = false; 
-			
-			name = username.substring(13);
-			password = pass.substring(13);
-			register = DatabaseHandler.registerNewUser(name, password);
-		
-			if (register) {
-				output.write("ACCEPTED");
-				output.newLine();
-				output.flush();
-			}
-			else {
-				output.write("DECLINED");
-				output.newLine();
-				output.flush();
-			}
-		}
-		
-	}
-	
-	/*
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub
+	public boolean loginChecker() {
 		try {
-			while(online()) {
-			String user, pw, loginregister;
-			loginregister = input.nextLine();
-			if (loginregister.equals("LOGIN")) {
-				int login = 0;	
-				user = input.nextLine();
-				pw = input.nextLine();
-				login = DatabaseHandler.userLogin(user, pw);
+			String tempName = input.readLine();
+			String tempPass = input.readLine();
+			
+			if (!tempName.startsWith("SENDLOGIN:") && !tempName.startsWith("SENDREGISTER:"))
+				return false;
+			
+			if (tempName.startsWith("SENDLOGIN:") && tempPass.startsWith("SENDLOGIN:")) {
+				int login = 0;
+				
+				name = tempName.substring(10);
+				password = tempPass.substring(10);
+							
+				login = DatabaseHandler.userLogin(name, password);
 				if(login > 0) {
-					output.format("%d\n", login);
+					output.write(login);
+					output.newLine();
 					output.flush();
+					return true;
 				}
 				else if (login == 0) {
-					output.format("%d\n", login);
+					output.write(login);
+					output.newLine();
 					output.flush();
-					
+					return false;
 				}
-			} 
-			else if (loginregister.equals("REGISTER")){
+			}
+			else if (tempName.startsWith("SENDREGISTER:") && tempPass.startsWith("SENDREGISTER:")){
+				boolean register = false; 
+				
+				name = tempName.substring(13);
+				password = tempPass.substring(13);
+				register = DatabaseHandler.registerNewUser(name, password);
 			
+				if (register) {
+					output.write("ACCEPTED");
+					output.newLine();
+					output.flush();
+					return true;
+				}
+				else {
+					output.write("DECLINED");
+					output.newLine();
+					output.flush();
+					return false;
+				}
 			}
-			
-			}
-		} finally {
-			try {
-				connection.close();
-				System.out.println("Connection closed");
-			} catch (IOException ioE) {
-				ioE.printStackTrace();
-			}
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
 		}
-		
+		return false;
 	}
-	*/
 }
