@@ -13,10 +13,14 @@ import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 import javax.imageio.ImageIO;
@@ -26,38 +30,42 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 /**
  * 
  * Class that makes the game board
  */
 public class LudoBoard extends JPanel {
-	private Color color[] = {Color.WHITE, Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.BLACK, Color.ORANGE, Color.GRAY};
+	private Color color[] = {Color.BLACK, Color.GREEN, Color.YELLOW, Color.RED, Color.BLUE, Color.WHITE, Color.ORANGE, Color.GRAY};
 	private final static int ROWS = 15;
 	private final static int COLUMNS = 15;
-	private Felter[][] felt;
 	private JButton bonde;
 	private Vector<Point> coordinatesGreen= new Vector<>();
 	private Vector<Point> coordinatesRed = new Vector<>();
 	private Vector<Point> coordinatesYellow= new Vector<>();
 	private Vector<Point> coordinatesBlue = new Vector<>();
-	private int RedLegitPotitions[][];
-	private int GreenLegitPotitions[][];
-	private int BlueLegitPotitions[][];
-	private int YellowLegitPotitions[][];
 	private Image testImage;
 	private JLayeredPane boardPane;
 	private JLabel board;
 	private JLabel die;
 	private BufferedImage testDraw;
 	Dimension boardSize;
+	private int currentPlayer = 1;
+	private int diceValue;
 	private final static int PICTUREWIDTH = 41;	// 620/15 pixels per grid
 	private final static int PICTUREHEIGHT = 41;	// 625/15 pixels per grid
 	private final static int OFFSET = 20;
 	private final static Point[][] GRID = new Point[ROWS][COLUMNS];
+	
+	final ArrayList<Pawned> greenPawns = new ArrayList<Pawned>();
+	final ArrayList<Pawned> yellowPawns = new ArrayList<Pawned>();
+	final ArrayList<Pawned> redPawns = new ArrayList<Pawned>();
+	final ArrayList<Pawned> bluePawns = new ArrayList<Pawned>();
 	
 	
 	
@@ -69,23 +77,15 @@ public class LudoBoard extends JPanel {
 		
 		setLayout(new GridBagLayout());
 		setLayout(new GridLayout(ROWS, COLUMNS, 0, 0));
-		//setBackground(color[0]);
-		
+		/*
 		RedLegitPotitions = new int[4][56];
 		GreenLegitPotitions = new int[4][56];
 		BlueLegitPotitions = new int[4][56];
 		YellowLegitPotitions = new int[4][56];
-		
-		final ArrayList<Pawn> greenPawns = new ArrayList<Pawn>();
-		final ArrayList<Pawn> yellowPawns = new ArrayList<Pawn>();
-		final ArrayList<Pawn> redPawns = new ArrayList<Pawn>();
-		final ArrayList<Pawn> bluePawn = new ArrayList<Pawn>();
-		
-		
-		felt = new Felter[15][15];
-		
-		
+		*/
+			
 		try {
+			
 			testImage = new ImageIcon(getClass().getResource("greenPawn1.png")).getImage();
 			//testDraw = ImageIO.read(new File("bluePawn1.png"));
 			//setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
@@ -117,27 +117,27 @@ public class LudoBoard extends JPanel {
 			JLabel greenPlayer = new JLabel("Green player");
 			greenPlayer.setBackground(Color.RED);
 			greenPlayer.setFont(new Font("Serif", Font.BOLD, 20));
-			greenPlayer.setBorder(BorderFactory.createLineBorder(color[5], 2, true));
+			greenPlayer.setBorder(BorderFactory.createLineBorder(color[0], 2, true));
 			greenPlayer.setOpaque(true);
-			greenPlayer.setBackground(color[2]);
+			greenPlayer.setBackground(color[1]);
 			
 			JLabel yellowPlayer = new JLabel("Yellow player");
 			yellowPlayer.setFont(new Font("Serif", Font.BOLD, 20));
-			yellowPlayer.setBorder(BorderFactory.createLineBorder(color[5], 2, true));
+			yellowPlayer.setBorder(BorderFactory.createLineBorder(color[0], 2, true));
 			yellowPlayer.setOpaque(true);
-			yellowPlayer.setBackground(color[4]);
+			yellowPlayer.setBackground(color[2]);
 			
 			JLabel redPlayer = new JLabel("Red player");
 			redPlayer.setFont(new Font("Serif", Font.BOLD, 20));
-			redPlayer.setBorder(BorderFactory.createLineBorder(color[5], 2, true));
+			redPlayer.setBorder(BorderFactory.createLineBorder(color[0], 2, true));
 			redPlayer.setOpaque(true);
-			redPlayer.setBackground(color[1]);
+			redPlayer.setBackground(color[3]);
 			
 			JLabel bluePlayer = new JLabel("Blue player");
 			bluePlayer.setFont(new Font("Serif", Font.BOLD, 20));
-			bluePlayer.setBorder(BorderFactory.createLineBorder(color[5], 2, true));
+			bluePlayer.setBorder(BorderFactory.createLineBorder(color[0], 2, true));
 			bluePlayer.setOpaque(true);
-			bluePlayer.setBackground(color[3]);
+			bluePlayer.setBackground(color[4]);
 			
 			players.setLayout(new GridBagLayout());
 			GridBagConstraints playerLayout = new GridBagConstraints();
@@ -169,126 +169,435 @@ public class LudoBoard extends JPanel {
 			
 			JButton dieRoller = new JButton(); 
 			dieRoller.setPreferredSize(new Dimension(200,200));
-			dieRoller.setText("Not your turn");
+			dieRoller.setText("Red Players turn");
 			dieRoller.setFont(new Font("Serif", Font.BOLD, 20));
+			
+			ActionListener rollDice = new ActionListener() {
+				public void actionPerformed(ActionEvent event) {
+					//TODO MOUSELISTENER -- KLIKKE PÅ BONDE -> BEVEGE DEN
+					//Dette er kun for testing purposes
+					Random rng = new Random();
+					diceValue = rng.nextInt(6) + 1;
+					diceValue = 6;	//6'er for testing
+					int player = rng.nextInt(4) +1 ;
+					int bonde = rng.nextInt(4);
+					if ( player == 1) {		
+						greenPawns.get(bonde).changeLocation(diceValue);
+						repaint();
+						}
+					else if(player == 2) {
+						redPawns.get(bonde).changeLocation(diceValue);
+						repaint();
+					}
+					else if (player == 3) {
+						yellowPawns.get(bonde).changeLocation(diceValue);
+						repaint();
+					}
+					else if (player == 4) {
+						bluePawns.get(bonde).changeLocation(diceValue);
+						repaint();
+					
+					}
+				}
+			};
+			dieRoller.addActionListener(rollDice);
 			
 			gameGUIComponents.setLayout(new BorderLayout());
 			gameGUIComponents.add(players, BorderLayout.NORTH);
 			gameGUIComponents.add(diePanel, BorderLayout.CENTER);
 			gameGUIComponents.add(dieRoller, BorderLayout.SOUTH);
 			 
-			addPawns(greenPawnIcon, greenPawns);
-			addPawns(yellowPawnIcon, yellowPawns);
-			addPawns(redPawnIcon, redPawns);
-			addPawns(bluePawnIcon, bluePawn);
-			
-			setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-			add(boardPane);
-			add(gameGUIComponents);
-		
 			makeGreenCoordinates();
 			makeRedCoordinates();
 			makeYellowCoordinates();
 			makeBlueCoordinates();
 			
-//			add(label);
-			//JLabel board1 = new JLabel(boardGame);
-			//boardPane.add(boardGame, new Integer(0));
-			//add(board1);
-			//Dimension boardSize = board1.getPreferredSize();
-			//board1.setBounds(15, 10, boardSize.width, boardSize.height);
-			//add(boardPane);
-			/*
-			for (int row = 0; row < felt.length; row++) {
-				for(int col = 0; col < felt[row].length; col++) {
-					felt[row][col] = new Felter(row, col);
-					add(felt[row][col]);
-					
-				}
+			try {
+				addPawns(greenPawns, 1);
+				addPawns(yellowPawns, 2);
+				addPawns(redPawns, 3);
+				addPawns(bluePawns, 4);
+			} catch (Exception e) {
+				System.out.println("Something went wrong, when making the pawns");
 			}
-			*/
-			
+
+			setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+			add(boardPane);
+			add(gameGUIComponents);					
 			} catch (Exception e) {
 				System.out.println("Error");
 			}
-		/*
-		for(int i = 1; i<=4; i++) {
-			int row = 0;
-			int col = 0;
-			//newRedPawn(i, i, row +1, col + i);
-		}
-		*/
 		
 	}//end LudoBoard constructor
 	
-	//TODO Legg til koordinater her
+	//Coordinates for all the pawns
 	
 	private void makeGreenCoordinates() {
-	
-		coordinatesGreen.add(new Point(215,145));
-		coordinatesGreen.add(new Point(145, 215));
-		coordinatesGreen.add(new Point(285, 215));
-		coordinatesGreen.add(new Point(215, 285));
+		
+		//Green home:
+		coordinatesGreen.add(new Point(197,117));	//location 0
+		coordinatesGreen.add(new Point(135, 175));
+		coordinatesGreen.add(new Point(260, 175));
+		coordinatesGreen.add(new Point(197, 230));
+		
+		//Green Track
+		coordinatesGreen.add(new Point(102, 372));
+		coordinatesGreen.add(new Point(167, 372));
+		coordinatesGreen.add(new Point(227, 372));
+		coordinatesGreen.add(new Point(292, 372));
+		coordinatesGreen.add(new Point(355, 372));
+		
+		coordinatesGreen.add(new Point(415, 317));
+		coordinatesGreen.add(new Point(415, 257));
+		coordinatesGreen.add(new Point(415, 205));
+		coordinatesGreen.add(new Point(415, 147));
+		coordinatesGreen.add(new Point(415, 92));
+		
+		coordinatesGreen.add(new Point(415, 37));	
+		coordinatesGreen.add(new Point(482, 37));
+		coordinatesGreen.add(new Point(545, 37));
+		
+		coordinatesGreen.add(new Point(545, 92));
+		coordinatesGreen.add(new Point(545, 147));
+		coordinatesGreen.add(new Point(545, 205));
+		coordinatesGreen.add(new Point(545, 257));
+		coordinatesGreen.add(new Point(545, 317));
+		
+		coordinatesGreen.add(new Point(605, 372));
+		coordinatesGreen.add(new Point(665, 372));
+		coordinatesGreen.add(new Point(725, 372));
+		coordinatesGreen.add(new Point(795, 372));
+		coordinatesGreen.add(new Point(855, 372));
+		
+		coordinatesGreen.add(new Point(915, 372));
+		coordinatesGreen.add(new Point(915, 432));
+		coordinatesGreen.add(new Point(915, 487));
+		
+		coordinatesGreen.add(new Point(855, 487));
+		coordinatesGreen.add(new Point(795, 487));
+		coordinatesGreen.add(new Point(725, 487));
+		coordinatesGreen.add(new Point(665, 487));
+		coordinatesGreen.add(new Point(605, 487));
+		
+		coordinatesGreen.add(new Point(545, 542));
+		coordinatesGreen.add(new Point(545, 602));
+		coordinatesGreen.add(new Point(545, 657));
+		coordinatesGreen.add(new Point(545, 712));
+		coordinatesGreen.add(new Point(545, 767));
+		
+		coordinatesGreen.add(new Point(545, 825));
+		coordinatesGreen.add(new Point(482, 825));
+		coordinatesGreen.add(new Point(415, 825));
+		
+		coordinatesGreen.add(new Point(415, 767));
+		coordinatesGreen.add(new Point(415, 712));
+		coordinatesGreen.add(new Point(415, 657));
+		coordinatesGreen.add(new Point(415, 602));
+		coordinatesGreen.add(new Point(415, 542));
+		
+		coordinatesGreen.add(new Point(355, 487));
+		coordinatesGreen.add(new Point(292, 487));
+		coordinatesGreen.add(new Point(227, 487));
+		coordinatesGreen.add(new Point(167, 487));
+		coordinatesGreen.add(new Point(102, 487));
+		
+		coordinatesGreen.add(new Point(42, 487));
+		coordinatesGreen.add(new Point(42, 432));
+		coordinatesGreen.add(new Point(42, 372));
+		
+		//Green Goal highway
+		coordinatesGreen.add(new Point(102, 372));
+		coordinatesGreen.add(new Point(102, 432));
+		coordinatesGreen.add(new Point(167,432));
+		coordinatesGreen.add(new Point(227,432));
+		coordinatesGreen.add(new Point(292,432));
+		coordinatesGreen.add(new Point(355,432));
+		
+		//Green Goal
+		coordinatesGreen.add(new Point(415,432));	//Location 62
+		
 	}
 	
 	private void makeRedCoordinates() {
-		coordinatesRed.add(new Point(835, 145));
-		coordinatesRed.add(new Point(765, 215));
-		coordinatesRed.add(new Point(905, 215));
-		coordinatesRed.add(new Point(835, 285));
+		//Red home coordinates
+		coordinatesRed.add(new Point(762, 117));
+		coordinatesRed.add(new Point(702, 175));
+		coordinatesRed.add(new Point(827, 175));
+		coordinatesRed.add(new Point(762, 230));
+		
+		//Red Track
+		coordinatesRed.add(new Point(545, 92));
+		coordinatesRed.add(new Point(545, 147));
+		coordinatesRed.add(new Point(545, 205));
+		coordinatesRed.add(new Point(545, 257));
+		coordinatesRed.add(new Point(545, 317));
+		
+		coordinatesRed.add(new Point(605, 372));
+		coordinatesRed.add(new Point(665, 372));
+		coordinatesRed.add(new Point(725, 372));
+		coordinatesRed.add(new Point(795, 372));
+		coordinatesRed.add(new Point(855, 372));
+		
+		coordinatesRed.add(new Point(915, 372));
+		coordinatesRed.add(new Point(915, 432));
+		coordinatesRed.add(new Point(915, 487));
+		
+		coordinatesRed.add(new Point(855, 487));
+		coordinatesRed.add(new Point(795, 487));
+		coordinatesRed.add(new Point(725, 487));
+		coordinatesRed.add(new Point(665, 487));
+		coordinatesRed.add(new Point(605, 487));
+		
+		coordinatesRed.add(new Point(545, 542));
+		coordinatesRed.add(new Point(545, 602));
+		coordinatesRed.add(new Point(545, 657));
+		coordinatesRed.add(new Point(545, 712));
+		coordinatesRed.add(new Point(545, 767));
+		
+		coordinatesRed.add(new Point(545, 825));
+		coordinatesRed.add(new Point(482, 825));
+		coordinatesRed.add(new Point(415, 825));
+		
+		coordinatesRed.add(new Point(415, 767));
+		coordinatesRed.add(new Point(415, 712));
+		coordinatesRed.add(new Point(415, 657));
+		coordinatesRed.add(new Point(415, 602));
+		coordinatesRed.add(new Point(415, 542));
+		
+		coordinatesRed.add(new Point(355, 487));
+		coordinatesRed.add(new Point(292, 487));
+		coordinatesRed.add(new Point(227, 487));
+		coordinatesRed.add(new Point(167, 487));
+		coordinatesRed.add(new Point(102, 487));
+		
+		coordinatesRed.add(new Point(42, 487));
+		coordinatesRed.add(new Point(42, 432));
+		coordinatesRed.add(new Point(42, 372));
+		
+		coordinatesRed.add(new Point(102, 372));
+		coordinatesRed.add(new Point(167, 372));
+		coordinatesRed.add(new Point(227, 372));
+		coordinatesRed.add(new Point(292, 372));
+		coordinatesRed.add(new Point(355, 372));
+		
+		coordinatesRed.add(new Point(415, 317));
+		coordinatesRed.add(new Point(415, 257));
+		coordinatesRed.add(new Point(415, 205));
+		coordinatesRed.add(new Point(415, 147));
+		coordinatesRed.add(new Point(415, 92));
+		
+		coordinatesRed.add(new Point(415, 37));	
+		coordinatesRed.add(new Point(482, 37));
+		coordinatesRed.add(new Point(545, 37));
+		
+		//Red Goalhighway coordinates
+		coordinatesRed.add(new Point(545, 92));
+		coordinatesRed.add(new Point(482, 92));
+		coordinatesRed.add(new Point(482, 147));
+		coordinatesRed.add(new Point(482, 205));
+		coordinatesRed.add(new Point(482, 257));
+		coordinatesRed.add(new Point(482, 317));
+		
+		//Red Goal coordinate
+		coordinatesRed.add(new Point(482, 372));
+		
 	}
 	private void makeYellowCoordinates() {
-		coordinatesYellow.add(new Point(215, 765));
-		coordinatesYellow.add(new Point(145, 835));
-		coordinatesYellow.add(new Point(215, 905));
-		coordinatesYellow.add(new Point(285, 835));
+		//Yellow home coordinates
+		coordinatesYellow.add(new Point(197, 627));
+		coordinatesYellow.add(new Point(135, 685));
+		coordinatesYellow.add(new Point(260, 685));
+		coordinatesYellow.add(new Point(197, 740));
+		
+		//Yellow Track
+		coordinatesYellow.add(new Point(415, 767));
+		coordinatesYellow.add(new Point(415, 712));
+		coordinatesYellow.add(new Point(415, 657));
+		coordinatesYellow.add(new Point(415, 602));
+		coordinatesYellow.add(new Point(415, 542));
+		
+		coordinatesYellow.add(new Point(355, 487));
+		coordinatesYellow.add(new Point(292, 487));
+		coordinatesYellow.add(new Point(227, 487));
+		coordinatesYellow.add(new Point(167, 487));
+		coordinatesYellow.add(new Point(102, 487));
+		
+		coordinatesYellow.add(new Point(42, 487));
+		coordinatesYellow.add(new Point(42, 432));
+		coordinatesYellow.add(new Point(42, 372));
+		
+		coordinatesYellow.add(new Point(102, 372));
+		coordinatesYellow.add(new Point(167, 372));
+		coordinatesYellow.add(new Point(227, 372));
+		coordinatesYellow.add(new Point(292, 372));
+		coordinatesYellow.add(new Point(355, 372));
+		
+		coordinatesYellow.add(new Point(415, 317));
+		coordinatesYellow.add(new Point(415, 257));
+		coordinatesYellow.add(new Point(415, 205));
+		coordinatesYellow.add(new Point(415, 147));
+		coordinatesYellow.add(new Point(415, 92));
+		
+		coordinatesYellow.add(new Point(415, 37));	
+		coordinatesYellow.add(new Point(482, 37));
+		coordinatesYellow.add(new Point(545, 37));
+		
+		coordinatesYellow.add(new Point(545, 92));
+		coordinatesYellow.add(new Point(545, 147));
+		coordinatesYellow.add(new Point(545, 205));
+		coordinatesYellow.add(new Point(545, 257));
+		coordinatesYellow.add(new Point(545, 317));
+		
+		coordinatesYellow.add(new Point(605, 372));
+		coordinatesYellow.add(new Point(665, 372));
+		coordinatesYellow.add(new Point(725, 372));
+		coordinatesYellow.add(new Point(795, 372));
+		coordinatesYellow.add(new Point(855, 372));
+		
+		coordinatesYellow.add(new Point(915, 372));
+		coordinatesYellow.add(new Point(915, 432));
+		coordinatesYellow.add(new Point(915, 487));
+		
+		coordinatesYellow.add(new Point(855, 487));
+		coordinatesYellow.add(new Point(795, 487));
+		coordinatesYellow.add(new Point(725, 487));
+		coordinatesYellow.add(new Point(665, 487));
+		coordinatesYellow.add(new Point(605, 487));
+		
+		coordinatesYellow.add(new Point(545, 542));
+		coordinatesYellow.add(new Point(545, 602));
+		coordinatesYellow.add(new Point(545, 657));
+		coordinatesYellow.add(new Point(545, 712));
+		coordinatesYellow.add(new Point(545, 767));
+		
+		coordinatesYellow.add(new Point(545, 825));
+		coordinatesYellow.add(new Point(482, 825));
+		coordinatesYellow.add(new Point(415, 825));
+		
+		//Yellow GoalHighway
+		coordinatesYellow.add(new Point(415, 767));
+		coordinatesYellow.add(new Point(482, 767));
+		coordinatesYellow.add(new Point(482, 712));
+		coordinatesYellow.add(new Point(482, 657));
+		coordinatesYellow.add(new Point(482, 602));
+		coordinatesYellow.add(new Point(482, 542));
+		
+		//Yellow Goal
+		coordinatesYellow.add(new Point(482, 487));
+	
 	}
 	private void makeBlueCoordinates() {
-		coordinatesBlue.add(new Point(835, 765));
-		coordinatesBlue.add(new Point(765, 835));
-		coordinatesBlue.add(new Point(835, 905));
-		coordinatesBlue.add(new Point(905, 835));
+		//Blue Home
+		coordinatesBlue.add(new Point(762, 627));
+		coordinatesBlue.add(new Point(702, 685));
+		coordinatesBlue.add(new Point(827, 685));
+		coordinatesBlue.add(new Point(762, 740));
+		
+		//Blue Track
+		coordinatesBlue.add(new Point(855, 487));
+		coordinatesBlue.add(new Point(795, 487));
+		coordinatesBlue.add(new Point(725, 487));
+		coordinatesBlue.add(new Point(665, 487));
+		coordinatesBlue.add(new Point(605, 487));
+		
+		coordinatesBlue.add(new Point(545, 542));
+		coordinatesBlue.add(new Point(545, 602));
+		coordinatesBlue.add(new Point(545, 657));
+		coordinatesBlue.add(new Point(545, 712));
+		coordinatesBlue.add(new Point(545, 767));
+		
+		coordinatesBlue.add(new Point(545, 825));
+		coordinatesBlue.add(new Point(482, 825));
+		coordinatesBlue.add(new Point(415, 825));
+		
+		coordinatesBlue.add(new Point(415, 767));
+		coordinatesBlue.add(new Point(415, 712));
+		coordinatesBlue.add(new Point(415, 657));
+		coordinatesBlue.add(new Point(415, 602));
+		coordinatesBlue.add(new Point(415, 542));
+		
+		coordinatesBlue.add(new Point(355, 487));
+		coordinatesBlue.add(new Point(292, 487));
+		coordinatesBlue.add(new Point(227, 487));
+		coordinatesBlue.add(new Point(167, 487));
+		coordinatesBlue.add(new Point(102, 487));
+		
+		coordinatesBlue.add(new Point(42, 487));
+		coordinatesBlue.add(new Point(42, 432));
+		coordinatesBlue.add(new Point(42, 372));
+		
+		coordinatesBlue.add(new Point(102, 372));
+		coordinatesBlue.add(new Point(167, 372));
+		coordinatesBlue.add(new Point(227, 372));
+		coordinatesBlue.add(new Point(292, 372));
+		coordinatesBlue.add(new Point(355, 372));
+		
+		coordinatesBlue.add(new Point(415, 317));
+		coordinatesBlue.add(new Point(415, 257));
+		coordinatesBlue.add(new Point(415, 205));
+		coordinatesBlue.add(new Point(415, 147));
+		coordinatesBlue.add(new Point(415, 92));
+		
+		coordinatesBlue.add(new Point(415, 37));	
+		coordinatesBlue.add(new Point(482, 37));
+		coordinatesBlue.add(new Point(545, 37));
+		
+		coordinatesBlue.add(new Point(545, 92));
+		coordinatesBlue.add(new Point(545, 147));
+		coordinatesBlue.add(new Point(545, 205));
+		coordinatesBlue.add(new Point(545, 257));
+		coordinatesBlue.add(new Point(545, 317));
+		
+		coordinatesBlue.add(new Point(605, 372));
+		coordinatesBlue.add(new Point(665, 372));
+		coordinatesBlue.add(new Point(725, 372));
+		coordinatesBlue.add(new Point(795, 372));
+		coordinatesBlue.add(new Point(855, 372));
+		
+		coordinatesBlue.add(new Point(915, 372));
+		coordinatesBlue.add(new Point(915, 432));
+		coordinatesBlue.add(new Point(915, 487));
+		
+		//Blue GoalHighway
+		coordinatesBlue.add(new Point(855, 487));
+		coordinatesBlue.add(new Point(855, 432));
+		coordinatesBlue.add(new Point(795, 432));
+		coordinatesBlue.add(new Point(725, 432));
+		coordinatesBlue.add(new Point(665, 432));
+		coordinatesBlue.add(new Point(605, 432));
+		
+		//Blue Goal
+		coordinatesBlue.add(new Point(545, 432));
+		
 	}
 	
-	public void addPawns(ImageIcon pawnImg, final ArrayList<Pawn> pawns) {
-		for(int i = 0; i <2; i++) {
-			for (int j = 0; j< 2; j++) {
-				JButton pawn = new JButton(pawnImg);
-				pawn.setBorderPainted(false);
-				pawn.setContentAreaFilled(false);
-				//boardPane.add(pawn, new Integer(1));
-				Dimension size = new Dimension(pawn.getIcon().getIconWidth(), pawn.getIcon().getIconHeight());
-				pawn.setBounds(0, 0, size.width, size.height);
-				Pawn newPawn = new Pawn(pawn, i);
-				pawns.add(newPawn);
-			}
+	public void addPawns(final ArrayList<Pawned> pawns, int color) {
+
+		for(int i = 0; i < 4; i++) {
+				Pawned newPawn = new Pawned(i, color);
+				pawns.add(newPawn);	
 		}
+	}
+	//public Object getValueAt(int row, int col) {
+	public Point getGreenCoordinates(int i) {
+		return coordinatesGreen.elementAt(i);
+	}
+	
+	public Point getYellowCoordinates(int i) {
+		return coordinatesYellow.elementAt(i);
+	}
+	
+	public Point getRedCoordinates(int i) {
+		return coordinatesRed.elementAt(i);
+	}
+	
+	public Point getBlueCoordinates(int i) {
+		return coordinatesBlue.elementAt(i);
 	}
 	
 	public void setUpGUI() {
 		
 	}
-	
-	//public void addPawn(int row, int col, String color) {
-	//	felt[row][col].makePawn(color);
-//	}
-	
-	public void makePotitions() {
-		
-	}
-	
-	/*
-	public ImageIcon createImageIcon(String path) {
-		try {
-			BufferedImage temp = new B;
-			ImageIcon icon = new ImageIcon(temp);
-			return icon;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-	*/
 	
 	public static ImageIcon resizeImageIcon(ImageIcon icon, Integer width, Integer height) {
 		BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TRANSLUCENT);
@@ -300,196 +609,148 @@ public class LudoBoard extends JPanel {
 	}
 	
 	public void paint(Graphics g){
-		super.paint(g);
-		Graphics2D g2 = (Graphics2D) g;
 		
-		for ( int i = 0; i< 4; i++) {
-		
-		float thickness = 4;
-		
-		g2.setColor(color[5]);
-		g2.setStroke(new BasicStroke(thickness));
-		g2.drawOval(coordinatesGreen.elementAt(i).x, coordinatesGreen.elementAt(i).y, 52, 52);
-		g2.setColor(color[2]);
-		g2.fillOval(coordinatesGreen.elementAt(i).x, coordinatesGreen.elementAt(i).y, 52, 52);
-		
-		g2.setColor(color[5]);
-		g2.drawOval(coordinatesRed.elementAt(i).x, coordinatesRed.elementAt(i).y, 52, 52);
-		g2.setColor(color[1]);
-		g2.fillOval(coordinatesRed.elementAt(i).x, coordinatesRed.elementAt(i).y, 52, 52);
-		
-		g2.setColor(color[5]);
-		g2.drawOval(coordinatesYellow.elementAt(i).x, coordinatesYellow.elementAt(i).y, 52, 52);
-		g2.setColor(color[4]);
-		g2.fillOval(coordinatesYellow.elementAt(i).x, coordinatesYellow.elementAt(i).y, 52, 52);
-		
-		g2.setColor(color[5]);
-		g2.drawOval(coordinatesBlue.elementAt(i).x, coordinatesBlue.elementAt(i).y, 52, 52);
-		g2.setColor(color[3]);
-		g2.fillOval(coordinatesBlue.elementAt(i).x, coordinatesBlue.elementAt(i).y, 52, 52);
-		}
-		/*
-		g.drawImage(testImage, p.x, p.y, null);
-		g.drawImage(testImage, p1.x, p1.y, null);
-		g.drawImage(testImage, p2.x, p2.y, null);
-		g.drawImage(testImage, p3.x, p3.y, null);
-			
-		/*
-	
-		*/
-			
-		//g.setColor(color[1]);
-		//g.fillRect(0, 0, 145, 80);
-	}
-
-	/*
-	/*
-	void Draw(Graphics2D g2d) {
-		for(int color = 1; color <=4; color++) {
-			
-		}
-	}
-	
-	
-	
-	public void paint(Graphics g) {
 		super.paint(g);
 		Graphics2D g2d = (Graphics2D)g;
-		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g2d.drawImage(boardGame, 0, 0, null);
-	}
-	
-	
-	/*
-	 * 
-	 * Ikke noe fornuftig lenger ned! Kun testing.
-	 * 
-	 */
-	
-	
-	/**
-	 * 
-	 * Class for a single field on the game board
-	 *
-	 */
-	private class Felter extends JButton {
+		paintPawns(g2d);
 		
-		private int row;
-		private int column;
-		private JButton pawn;
-		private boolean goal = false; 
-		private boolean home = false;
-		
-		private Vector<Pawn> RedPawn = new Vector<Pawn>();   
-		private Vector<Pawn> GreenPawn = new Vector<Pawn>();
-		private Vector<Pawn> BluePawn = new Vector<Pawn>();
-		private Vector<Pawn> YellowPawn = new Vector<Pawn>();
-		
-		ImageIcon bluePawnIcon = new ImageIcon(getClass().getResource("bluePawn1.png"));
-		
-		public Felter(int r, int k) {
-			row = r;
-			column = k;
-			setOpaque(true);
-			setBorderPainted(false);
-			setContentAreaFilled(false);
-			setIcon(bluePawnIcon);
-			setBorder(BorderFactory.createLineBorder(color[5]));
-		}
-		
-		public int getFeltrow() {
-			return row;
-		}
-		
-		public int getFeltcolumn() {
-			return column;
-		}
-		/**
-		 * Paints the field in the correct color
-		 */
 		/*
-		public void paintComponent(Graphics g) {
-			
-			if ( row < 6 && column >= 0 && column < 6) {
-			super.paintComponent(g);
-			g.drawRect(0, 0, 145, 80);
-			g.setColor(color[1]);
-			g.fillRect(0, 0, 145, 80);
-			}
-			else if (row >= 9 && column < 6) {
-				g.drawRect(0, 0, 145, 80);
-				g.setColor(color[2]);
-				g.fillRect(0, 0, 145, 80);
-			}
-			else if (row < 6 && column >= 9){
-				g.drawRect(0, 0, 145, 80);
-				g.setColor(color[3]);
-				g.fillRect(0, 0, 145, 80);
-			}
-			else if (row >= 9 && column >= 9){
-				g.drawRect(0, 0, 145, 80);
-				g.setColor(color[4]);
-				g.fillRect(0, 0, 145, 80);
-			}
-			else if(row >= 6 && row <=7  && column == 1 ) {
-				g.drawRect(0, 0, 145, 80);
-				g.setColor(color[1]);
-				g.fillRect(0, 0, 145, 80);
-				
-			}
-			else if(row == 1 && column  >= 7 && column <=8) {
-				g.drawRect(0, 0, 145, 80);
-				g.setColor(color[3]);
-				g.fillRect(0, 0, 145, 80);
-			}
-			else if(row >= 7 && row <= 8 && column == 13) {
-				g.drawRect(0, 0, 145, 80);
-				g.setColor(color[4]);
-				g.fillRect(0, 0, 145, 80);
-			}
-			else if(row == 13 && column >= 6 && column <= 7) {
-				g.drawRect(0, 0, 145, 80);
-				g.setColor(color[2]);
-				g.fillRect(0, 0, 145, 80);
-			}
-			else if (column == 7 && row >= 9 && row <=13) {
-				g.drawRect(0, 0, 145, 80);
-				g.setColor(color[2]);
-				g.fillRect(0, 0, 145, 80);
-			}
-			else if (row == 7 && column >= 2 && column <= 5) {
-				g.drawRect(0, 0, 145, 80);
-				g.setColor(color[1]);
-				g.fillRect(0, 0, 145, 80);
-			}
-			else if (column == 7 && row >= 2 && row <=5) {
-				g.drawRect(0, 0, 145, 80);
-				g.setColor(color[3]);
-				g.fillRect(0, 0, 145, 80);
-			}
-			else if( row == 7 && column >= 9 && column <= 12) {
-				g.drawRect(0, 0, 145, 80);
-				g.setColor(color[4]);
-				g.fillRect(0, 0, 145, 80);
-			}
-			else if (row >= 6 && row <= 8 && column >= 6 && column <= 8){
-				g.drawRect(0, 0, 145, 80);
-				g.setColor(color[6]);
-				g.fillRect(0, 0, 145, 80);
-			}
+		 * TEST
+		 * DRAWS A PAWN ON EVERY POSSIBLE LOCATION
+		 * TODO REMOVE THIS
+		Graphics2D g2 = (Graphics2D) g;
+		
+		for ( int i = 0; i < coordinatesBlue.size(); i++) {
+		
+		float thickness = 4;
+		g2.setStroke(new BasicStroke(thickness));
+		
+		g2.setColor(color[5]);
+		
+		g2.drawOval(coordinatesGreen.elementAt(i).x, coordinatesGreen.elementAt(i).y, 40, 40);
+		g2.setColor(color[2]);
+		g2.fillOval(coordinatesGreen.elementAt(i).x, coordinatesGreen.elementAt(i).y, 40, 40);
+		
+		
+		g2.setColor(color[5]);
+		g2.drawOval(coordinatesRed.elementAt(i).x, coordinatesRed.elementAt(i).y, 40, 40);
+		g2.setColor(color[1]);
+		g2.fillOval(coordinatesRed.elementAt(i).x, coordinatesRed.elementAt(i).y, 40, 40);
+		
+		
+		g2.setColor(color[5]);
+		g2.drawOval(coordinatesYellow.elementAt(i).x, coordinatesYellow.elementAt(i).y, 40, 40);
+		g2.setColor(color[4]);
+		g2.fillOval(coordinatesYellow.elementAt(i).x, coordinatesYellow.elementAt(i).y, 40, 40);
+		
+		
+		g2.setColor(color[5]);
+		g2.drawOval(coordinatesBlue.elementAt(i).x, coordinatesBlue.elementAt(i).y, 40, 40);
+		g2.setColor(color[3]);
+		g2.fillOval(coordinatesBlue.elementAt(i).x, coordinatesBlue.elementAt(i).y, 40, 40);
+		
 		}
 		*/
-		public void makePawn(String color) {
-			
-			pawn = new JButton(color); 
-			add(pawn);
-			
-		}
-		
-		public void newRedPawn(int pawnloc, int nr, int row, int col) {
-			RedPawn.add(new Pawn(pawnloc, nr));
-			//add(RedPawn);
-		}
 	}
 	
-}
+	void paintPawns(Graphics2D g2d) {
+		for (int i = 0; i< 4; i++) {
+				int loc = greenPawns.get(i).returnLocation();
+				float thickness = 4;
+				g2d.setStroke(new BasicStroke(thickness));
+				
+				g2d.setColor(color[0]);
+				g2d.drawOval(coordinatesGreen.elementAt(loc).x, coordinatesGreen.elementAt(loc).y, 40, 40);
+				g2d.setColor(color[1]);
+				g2d.fillOval(coordinatesGreen.elementAt(loc).x, coordinatesGreen.elementAt(loc).y, 40, 40);
+				
+				loc = yellowPawns.get(i).returnLocation();
+				g2d.setColor(color[0]);
+				g2d.drawOval(coordinatesYellow.elementAt(loc).x, coordinatesYellow.elementAt(loc).y, 40, 40);
+				g2d.setColor(color[2]);
+				g2d.fillOval(coordinatesYellow.elementAt(loc).x, coordinatesYellow.elementAt(loc).y, 40, 40);
+				
+				loc = redPawns.get(i).returnLocation();
+				g2d.setColor(color[0]);
+				g2d.drawOval(coordinatesRed.elementAt(loc).x, coordinatesRed.elementAt(loc).y, 40, 40);
+				g2d.setColor(color[3]);
+				g2d.fillOval(coordinatesRed.elementAt(loc).x, coordinatesRed.elementAt(loc).y, 40, 40);
+				
+				loc = bluePawns.get(i).returnLocation();
+				g2d.setColor(color[0]);
+				g2d.drawOval(coordinatesBlue.elementAt(loc).x, coordinatesBlue.elementAt(loc).y, 40, 40);
+				g2d.setColor(color[4]);
+				g2d.fillOval(coordinatesBlue.elementAt(loc).x, coordinatesBlue.elementAt(loc).y, 40, 40);
+		}
+		
+	}
+	/**
+	 * 
+	 * @author Hauken
+	 *Class that holds the information about every pawn
+	 *
+	 */
+	public class Pawned {
+		private int pawnnr;
+		private int location; //location 0-3 er hjemmeplassering.
+		private int homelocation;
+		private int color;	
+		private final static int POTITIONS = 62;
+		private Vector<Point> coordinates= new Vector<>();
+		private Color paintColor[] = {Color.BLACK, Color.GREEN, Color.YELLOW, Color.RED, Color.BLUE};
+		
+		/**
+		 * Class constructor that makes every pawn and set their starting location
+		 * @param loc holds the start location of the current pawn
+		 * @param col holds the same nuber as location, but this is to verify the color
+		 */
+		public Pawned(int loc, int col){
+			homelocation = loc;
+			location = loc; 
+			color = col;
+						
+			if (color == 1) {	
+				Point p = getGreenCoordinates(loc);
+				coordinates.add(new Point(p.x, p.y));	
+			}
+			 if (color == 2) {
+					
+				Point p = getYellowCoordinates(loc);
+				coordinates.add(new Point(p.x, p.y));
+			
+			 }	
+			if (color == 3) {
+				Point p = getRedCoordinates(loc);
+				coordinates.add(new Point(p.x, p.y));
+			}	
+			if (color == 4) {
+				Point p = getBlueCoordinates(loc);
+				coordinates.add(new Point(p.x, p.y));
+			}
+		}
+		/**
+		 * Method that returns a pawns location
+		 * @return returns a pawns current location
+		 */
+		public int returnLocation() {
+			return location;
+		}
+		/**
+		 * Method that returns a pawns homelocation.
+		 *  This is used when the pawn is knocked back to the starting location
+		 * @return returns a pawns homelocation
+		 */
+		public int homeLocation() {
+			return homelocation;
+		}
+		/**
+		 * Method that changes a pawns location
+		 * @param n holds the location that the pawns should change to
+		 */
+		public void changeLocation(int n) {
+			location += n; 
+		}
+		
+	} //END OF PAWN CLASS
+}//END OF LUDOBOARD CLASS
+	
