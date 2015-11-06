@@ -43,12 +43,12 @@ import javax.swing.JTextField;
 public class LudoBoard extends JPanel {
 	private Color color[] = {Color.BLACK, Color.GREEN, Color.YELLOW, Color.RED, Color.BLUE, Color.WHITE, Color.ORANGE, Color.GRAY};
 
-	private JButton bonde;
+	private BufferedImage testDraw;
 	private Image testImage;
 	private JLayeredPane boardPane;
 	private JLabel board;
 	private JLabel die;
-	private BufferedImage testDraw;
+	
 	Dimension boardSize;
 	private int currentPlayer = 1;
 	private int diceValue;
@@ -70,25 +70,15 @@ public class LudoBoard extends JPanel {
 	final ArrayList<Pawned> redPawns = new ArrayList<Pawned>();
 	final ArrayList<Pawned> bluePawns = new ArrayList<Pawned>();
 	
-	
 	/**
 	 * Constructor for the ludo board
 	 * Makes all the columns and rows and paints them.
 	 */
 	public LudoBoard() {
-		
-		setLayout(new GridBagLayout());
-		setLayout(new GridLayout(ROWS, COLUMNS, 0, 0));
-		/*
-		RedLegitPotitions = new int[4][56];
-		GreenLegitPotitions = new int[4][56];
-		BlueLegitPotitions = new int[4][56];
-		YellowLegitPotitions = new int[4][56];
-		*/
-			
+	
 		try {
-			
 			/*
+			 * Kan bruke Icon isteden for 
 			 * testDraw = ImageIO.read(new File("bluePawn1.png"));
 			 * setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 			 * ImageIcon boardBackground = createImageIcon("ludoBoard.png");
@@ -96,120 +86,10 @@ public class LudoBoard extends JPanel {
 			 * ImageIcon yellowPawnIcon = new ImageIcon(getClass().getResource("yellowPawn1.png"));
 			 * ImageIcon redPawnIcon = new ImageIcon(getClass().getResource("redPawn1.png"));
 			 * ImageIcon bluePawnIcon = new ImageIcon(getClass().getResource("bluePawn1.png"));
+			 * testImage = new ImageIcon(getClass().getResource("greenPawn1.png")).getImage();
 			 */
 			
-			testImage = new ImageIcon(getClass().getResource("greenPawn1.png")).getImage();
-			ImageIcon boardBackground = new ImageIcon(getClass().getResource("ludo_Board.png"));
-			ImageIcon gameBoard = resizeImageIcon(boardBackground, 1000, 900);
-			ImageIcon die = new ImageIcon(getClass().getResource("dice6.png"));
-			
-			boardPane = new JLayeredPane();
-			boardPane.setPreferredSize(new Dimension(1010, 950));
-			boardPane.setOpaque(true);
-			boardPane.setBackground(color[5]);
-			board = new JLabel();	//Board Label
-			board.setIcon(gameBoard);	//Sets the boardBackground
-			boardPane.add(board, new Integer(0));
-			boardSize = board.getPreferredSize();	
-			board.setBounds(0, 0, boardSize.width, boardSize.height); //Gives the image some extra space
-					
-			JPanel gameGUIComponents = new JPanel();
-			JPanel players = new JPanel();
-			players.setPreferredSize(new Dimension(200,200));
-			players.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), "Players"));
-			players.setBackground(color[6]);
-			
-			JLabel greenPlayer = new JLabel("Green player");
-			greenPlayer.setBackground(Color.RED);
-			greenPlayer.setFont(new Font("Serif", Font.BOLD, 20));
-			greenPlayer.setBorder(BorderFactory.createLineBorder(color[0], 2, true));
-			greenPlayer.setOpaque(true);
-			greenPlayer.setBackground(color[1]);
-			
-			JLabel yellowPlayer = new JLabel("Yellow player");
-			yellowPlayer.setFont(new Font("Serif", Font.BOLD, 20));
-			yellowPlayer.setBorder(BorderFactory.createLineBorder(color[0], 2, true));
-			yellowPlayer.setOpaque(true);
-			yellowPlayer.setBackground(color[2]);
-			
-			JLabel redPlayer = new JLabel("Red player");
-			redPlayer.setFont(new Font("Serif", Font.BOLD, 20));
-			redPlayer.setBorder(BorderFactory.createLineBorder(color[0], 2, true));
-			redPlayer.setOpaque(true);
-			redPlayer.setBackground(color[3]);
-			
-			JLabel bluePlayer = new JLabel("Blue player");
-			bluePlayer.setFont(new Font("Serif", Font.BOLD, 20));
-			bluePlayer.setBorder(BorderFactory.createLineBorder(color[0], 2, true));
-			bluePlayer.setOpaque(true);
-			bluePlayer.setBackground(color[4]);
-			
-			players.setLayout(new GridBagLayout());
-			GridBagConstraints playerLayout = new GridBagConstraints();
-			playerLayout.fill = GridBagConstraints.HORIZONTAL;
-			playerLayout.weightx = 1;
-			playerLayout.weighty = 1;
-			playerLayout.gridy = 0;
-			players.add(greenPlayer, playerLayout);
-			playerLayout.gridy = 1;
-			players.add(yellowPlayer, playerLayout);
-			playerLayout.gridy = 2;
-			players.add(redPlayer, playerLayout);
-			playerLayout.gridy = 3;
-			players.add(bluePlayer, playerLayout);
-			
-			JPanel diePanel = new JPanel();
-			diePanel.setLayout(new GridBagLayout());
-			GridBagConstraints diePanelConstraints = new GridBagConstraints();
-			diePanel.setPreferredSize(new Dimension(200, 200));
-			diePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color[5]), "Die"));
-			
-			JLabel dieLabel1 = new JLabel();
-			
-			dieLabel1.setIcon(die);
-	
-			diePanelConstraints.anchor = GridBagConstraints.CENTER;
-			diePanelConstraints.gridy = 0;
-			diePanel.add(dieLabel1, diePanelConstraints);
-			
-			JButton dieRoller = new JButton(); 
-			dieRoller.setPreferredSize(new Dimension(200,200));
-			dieRoller.setText("Red Players turn");
-			dieRoller.setFont(new Font("Serif", Font.BOLD, 20));
-			
-			ActionListener rollDice = new ActionListener() {
-				public void actionPerformed(ActionEvent event) {
-					//TODO MOUSELISTENER -- KLIKKE PÅ BONDE -> BEVEGE DEN
-					//Dette er kun for testing purposes
-					Random rng = new Random();
-					diceValue = rng.nextInt(6) + 1;
-					diceValue = 6;	//6'er for testing
-					int player = rng.nextInt(4) +1 ;
-					int bonde = rng.nextInt(4);
-					if ( player == 1) {		
-						greenPawns.get(bonde).changeLocation(diceValue);
-						repaint();
-						}
-					else if(player == 2) {
-						redPawns.get(bonde).changeLocation(diceValue);
-						repaint();
-					}
-					else if (player == 3) {
-						yellowPawns.get(bonde).changeLocation(diceValue);
-						repaint();
-					}
-					else if (player == 4) {
-						bluePawns.get(bonde).changeLocation(diceValue);
-						repaint();
-					}
-				}
-			};
-			dieRoller.addActionListener(rollDice);
-			
-			gameGUIComponents.setLayout(new BorderLayout());
-			gameGUIComponents.add(players, BorderLayout.NORTH);
-			gameGUIComponents.add(diePanel, BorderLayout.CENTER);
-			gameGUIComponents.add(dieRoller, BorderLayout.SOUTH);
+			setUpGUI();
 			 
 			makeGreenCoordinates();
 			makeRedCoordinates();
@@ -224,10 +104,7 @@ public class LudoBoard extends JPanel {
 			} catch (Exception e) {
 				System.out.println("Something went wrong, when making the pawns");
 			}
-
-			setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-			add(boardPane);
-			add(gameGUIComponents);					
+			
 			} catch (Exception e) {
 				System.out.println("Error");
 			}
@@ -576,7 +453,6 @@ public class LudoBoard extends JPanel {
 	}
 	
 	public void addPawns(final ArrayList<Pawned> pawns, int color) {
-
 		for(int i = 0; i < 4; i++) {
 				Pawned newPawn = new Pawned(i, color);
 				pawns.add(newPawn);	
@@ -601,6 +477,121 @@ public class LudoBoard extends JPanel {
 	
 	public void setUpGUI() {
 		
+		ImageIcon boardBackground = new ImageIcon(getClass().getResource("ludo_Board.png"));
+		ImageIcon gameBoard = resizeImageIcon(boardBackground, 1000, 900);
+		ImageIcon die = new ImageIcon(getClass().getResource("dice6.png"));
+		
+		boardPane = new JLayeredPane();
+		boardPane.setPreferredSize(new Dimension(1010, 950));
+		boardPane.setOpaque(true);
+		boardPane.setBackground(color[5]);
+		board = new JLabel();	//Board Label
+		board.setIcon(gameBoard);	//Sets the boardBackground
+		boardPane.add(board, new Integer(0));
+		boardSize = board.getPreferredSize();	
+		board.setBounds(0, 0, boardSize.width, boardSize.height); //Gives the image some extra space
+		/*		
+		JPanel gameGUIComponents = new JPanel();
+		JPanel players = new JPanel();
+		players.setPreferredSize(new Dimension(200,200));
+		players.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), "Players"));
+		players.setBackground(color[6]);
+		
+		JLabel greenPlayer = new JLabel("Green player");
+		greenPlayer.setBackground(Color.RED);
+		greenPlayer.setFont(new Font("Serif", Font.BOLD, 20));
+		greenPlayer.setBorder(BorderFactory.createLineBorder(color[0], 2, true));
+		greenPlayer.setOpaque(true);
+		greenPlayer.setBackground(color[1]);
+		
+		JLabel yellowPlayer = new JLabel("Yellow player");
+		yellowPlayer.setFont(new Font("Serif", Font.BOLD, 20));
+		yellowPlayer.setBorder(BorderFactory.createLineBorder(color[0], 2, true));
+		yellowPlayer.setOpaque(true);
+		yellowPlayer.setBackground(color[2]);
+		
+		JLabel redPlayer = new JLabel("Red player");
+		redPlayer.setFont(new Font("Serif", Font.BOLD, 20));
+		redPlayer.setBorder(BorderFactory.createLineBorder(color[0], 2, true));
+		redPlayer.setOpaque(true);
+		redPlayer.setBackground(color[3]);
+		
+		JLabel bluePlayer = new JLabel("Blue player");
+		bluePlayer.setFont(new Font("Serif", Font.BOLD, 20));
+		bluePlayer.setBorder(BorderFactory.createLineBorder(color[0], 2, true));
+		bluePlayer.setOpaque(true);
+		bluePlayer.setBackground(color[4]);
+		
+		players.setLayout(new GridBagLayout());
+		GridBagConstraints playerLayout = new GridBagConstraints();
+		playerLayout.fill = GridBagConstraints.HORIZONTAL;
+		playerLayout.weightx = 1;
+		playerLayout.weighty = 1;
+		playerLayout.gridy = 0;
+		players.add(greenPlayer, playerLayout);
+		playerLayout.gridy = 1;
+		players.add(yellowPlayer, playerLayout);
+		playerLayout.gridy = 2;
+		players.add(redPlayer, playerLayout);
+		playerLayout.gridy = 3;
+		players.add(bluePlayer, playerLayout);
+		
+		JPanel diePanel = new JPanel();
+		diePanel.setLayout(new GridBagLayout());
+		GridBagConstraints diePanelConstraints = new GridBagConstraints();
+		diePanel.setPreferredSize(new Dimension(200, 200));
+		diePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color[5]), "Die"));
+		
+		JLabel dieLabel1 = new JLabel();
+		
+		dieLabel1.setIcon(die);
+
+		diePanelConstraints.anchor = GridBagConstraints.CENTER;
+		diePanelConstraints.gridy = 0;
+		diePanel.add(dieLabel1, diePanelConstraints);
+		
+		JButton dieRoller = new JButton(); 
+		dieRoller.setPreferredSize(new Dimension(200,200));
+		dieRoller.setText("Red Players turn");
+		dieRoller.setFont(new Font("Serif", Font.BOLD, 20));
+		
+		ActionListener rollDice = new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				//TODO MOUSELISTENER -- KLIKKE PÅ BONDE -> BEVEGE DEN
+				//Dette er kun for testing purposes
+				Random rng = new Random();
+				diceValue = rng.nextInt(6) + 1;
+				diceValue = 6;	//6'er for testing
+				int player = rng.nextInt(4) +1 ;
+				int bonde = rng.nextInt(4);
+				if ( player == 1) {		
+					greenPawns.get(bonde).changeLocation(diceValue);
+					repaint();
+					}
+				else if(player == 2) {
+					redPawns.get(bonde).changeLocation(diceValue);
+					repaint();
+				}
+				else if (player == 3) {
+					yellowPawns.get(bonde).changeLocation(diceValue);
+					repaint();
+				}
+				else if (player == 4) {
+					bluePawns.get(bonde).changeLocation(diceValue);
+					repaint();
+				}
+			}
+		};
+		dieRoller.addActionListener(rollDice);
+		
+		gameGUIComponents.setLayout(new BorderLayout());
+		gameGUIComponents.add(players, BorderLayout.NORTH);
+		gameGUIComponents.add(diePanel, BorderLayout.CENTER);
+		gameGUIComponents.add(dieRoller, BorderLayout.SOUTH);
+		*/
+		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+		add(boardPane);
+		//add(gameGUIComponents);	
 	}
 	
 	public static ImageIcon resizeImageIcon(ImageIcon icon, Integer width, Integer height) {
@@ -698,7 +689,6 @@ public class LudoBoard extends JPanel {
 		private int location; //location 0-3 er hjemmeplassering.
 		private int homelocation;
 		private int color;	
-		private final static int POTITIONS = 62;
 		private Vector<Point> coordinates= new Vector<>();
 		private Color paintColor[] = {Color.BLACK, Color.GREEN, Color.YELLOW, Color.RED, Color.BLUE};
 		
