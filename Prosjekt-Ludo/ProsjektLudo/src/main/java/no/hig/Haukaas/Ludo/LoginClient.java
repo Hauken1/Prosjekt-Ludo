@@ -136,6 +136,7 @@ public class LoginClient extends JFrame {
 		String textUsername = userType.getText();
 		String textPassword = passType.getText();
 		
+		//Kommentert bort pga. testing og raskere logging
 			// Makes sure that something is writen in
 		if (textUsername != null && !textUsername.equals("") &&
 				textPassword != null && !textPassword.equals("")) {
@@ -143,6 +144,7 @@ public class LoginClient extends JFrame {
 			try {
 				sendInfo("SENDLOGIN:" + textUsername, "SENDLOGIN:" + textPassword);	// send username and passord to server
 				int n = input.read();	// reads the respons from the server
+				//int n = 1;	//Kun for
 				if (n == 0) {	//if wrong
 					reconnect();	//reconnets to the server
 				}
