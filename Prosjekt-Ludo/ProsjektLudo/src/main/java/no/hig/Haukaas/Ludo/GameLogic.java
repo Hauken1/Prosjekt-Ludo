@@ -26,7 +26,7 @@ public class GameLogic {
 			}
 		
 		for(int i = 1; i<=4; i++) {
-			newRedPawn(i, i);
+		//	newRedPawn(i, i);
 		}
 		
 	}
@@ -35,9 +35,10 @@ public class GameLogic {
 	public void startPawn(){
 		
 	}
-	
+	/*
 	public void newRedPawn(int pawnloc, int nr) {
 		RedPawn.add(new Pawn(pawnloc, nr));
 		
 	}
+	*/
 }
