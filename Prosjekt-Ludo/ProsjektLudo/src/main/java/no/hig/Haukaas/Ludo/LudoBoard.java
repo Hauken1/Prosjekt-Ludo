@@ -42,13 +42,8 @@ import javax.swing.JTextField;
  */
 public class LudoBoard extends JPanel {
 	private Color color[] = {Color.BLACK, Color.GREEN, Color.YELLOW, Color.RED, Color.BLUE, Color.WHITE, Color.ORANGE, Color.GRAY};
-	private final static int ROWS = 15;
-	private final static int COLUMNS = 15;
+
 	private JButton bonde;
-	private Vector<Point> coordinatesGreen= new Vector<>();
-	private Vector<Point> coordinatesRed = new Vector<>();
-	private Vector<Point> coordinatesYellow= new Vector<>();
-	private Vector<Point> coordinatesBlue = new Vector<>();
 	private Image testImage;
 	private JLayeredPane boardPane;
 	private JLabel board;
@@ -57,16 +52,23 @@ public class LudoBoard extends JPanel {
 	Dimension boardSize;
 	private int currentPlayer = 1;
 	private int diceValue;
+	
+	private final static int ROWS = 15;
+	private final static int COLUMNS = 15;
 	private final static int PICTUREWIDTH = 41;	// 620/15 pixels per grid
 	private final static int PICTUREHEIGHT = 41;	// 625/15 pixels per grid
 	private final static int OFFSET = 20;
 	private final static Point[][] GRID = new Point[ROWS][COLUMNS];
 	
+	private Vector<Point> coordinatesGreen= new Vector<>();
+	private Vector<Point> coordinatesRed = new Vector<>();
+	private Vector<Point> coordinatesYellow= new Vector<>();
+	private Vector<Point> coordinatesBlue = new Vector<>();
+	
 	final ArrayList<Pawned> greenPawns = new ArrayList<Pawned>();
 	final ArrayList<Pawned> yellowPawns = new ArrayList<Pawned>();
 	final ArrayList<Pawned> redPawns = new ArrayList<Pawned>();
 	final ArrayList<Pawned> bluePawns = new ArrayList<Pawned>();
-	
 	
 	
 	/**
@@ -86,22 +88,25 @@ public class LudoBoard extends JPanel {
 			
 		try {
 			
+			/*
+			 * testDraw = ImageIO.read(new File("bluePawn1.png"));
+			 * setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+			 * ImageIcon boardBackground = createImageIcon("ludoBoard.png");
+			 * ImageIcon greenPawnIcon = new ImageIcon(getClass().getResource("greenPawn1.png"));
+			 * ImageIcon yellowPawnIcon = new ImageIcon(getClass().getResource("yellowPawn1.png"));
+			 * ImageIcon redPawnIcon = new ImageIcon(getClass().getResource("redPawn1.png"));
+			 * ImageIcon bluePawnIcon = new ImageIcon(getClass().getResource("bluePawn1.png"));
+			 */
+			
 			testImage = new ImageIcon(getClass().getResource("greenPawn1.png")).getImage();
-			//testDraw = ImageIO.read(new File("bluePawn1.png"));
-			//setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 			ImageIcon boardBackground = new ImageIcon(getClass().getResource("ludo_Board.png"));
 			ImageIcon gameBoard = resizeImageIcon(boardBackground, 1000, 900);
-			//ImageIcon boardBackground = createImageIcon("ludoBoard.png");
-			ImageIcon greenPawnIcon = new ImageIcon(getClass().getResource("greenPawn1.png"));
-			ImageIcon yellowPawnIcon = new ImageIcon(getClass().getResource("yellowPawn1.png"));
-			ImageIcon redPawnIcon = new ImageIcon(getClass().getResource("redPawn1.png"));
-			ImageIcon bluePawnIcon = new ImageIcon(getClass().getResource("bluePawn1.png"));
 			ImageIcon die = new ImageIcon(getClass().getResource("dice6.png"));
 			
 			boardPane = new JLayeredPane();
-			boardPane.setPreferredSize(new Dimension(1100, 1150));
+			boardPane.setPreferredSize(new Dimension(1010, 950));
 			boardPane.setOpaque(true);
-			boardPane.setBackground(color[7]);
+			boardPane.setBackground(color[5]);
 			board = new JLabel();	//Board Label
 			board.setIcon(gameBoard);	//Sets the boardBackground
 			boardPane.add(board, new Integer(0));
@@ -196,7 +201,6 @@ public class LudoBoard extends JPanel {
 					else if (player == 4) {
 						bluePawns.get(bonde).changeLocation(diceValue);
 						repaint();
-					
 					}
 				}
 			};
@@ -691,7 +695,6 @@ public class LudoBoard extends JPanel {
 	 *
 	 */
 	public class Pawned {
-		private int pawnnr;
 		private int location; //location 0-3 er hjemmeplassering.
 		private int homelocation;
 		private int color;	
