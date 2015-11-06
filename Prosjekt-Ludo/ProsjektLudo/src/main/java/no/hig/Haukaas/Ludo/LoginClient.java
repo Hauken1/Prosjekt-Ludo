@@ -44,7 +44,9 @@ public class LoginClient extends JFrame {
 	private JButton registerButton;
 	private Socket connection; //connection to server
 	private BufferedWriter output; //output from server
-	private BufferedReader input; //input to server
+	private BufferedReader input; //input to server¨
+	
+	private String clientUserName;
 	
 	/**
 	 * Constructor for the login Client. Makes necessary objects/elements
@@ -136,6 +138,7 @@ public class LoginClient extends JFrame {
 		String textUsername = userType.getText();
 		String textPassword = passType.getText();
 		
+		//Kommentert bort pga. testing og raskere logging
 			// Makes sure that something is writen in
 		if (textUsername != null && !textUsername.equals("") &&
 				textPassword != null && !textPassword.equals("")) {
@@ -143,12 +146,14 @@ public class LoginClient extends JFrame {
 			try {
 				sendInfo("SENDLOGIN:" + textUsername, "SENDLOGIN:" + textPassword);	// send username and passord to server
 				int n = input.read();	// reads the respons from the server
+				//int n = 1;	//Kun for
 				if (n == 0) {	//if wrong
 					reconnect();	//reconnets to the server
 				}
 				if (n > 0) {	//Logger inn, hvis true
+					clientUserName = textUsername;
 					setVisible(false);
-					LudoClient client = new LudoClient(LudoClienthost, connection, output, input, n);
+					LudoClient client = new LudoClient(LudoClienthost, connection, output, input, n, clientUserName);
 					client.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
 					
 				}
@@ -207,11 +212,12 @@ public class LoginClient extends JFrame {
 	 * @return return true if the registration process is successful, if not return false. 
 	 */
 	private boolean processLogin(String login) {
-		if (login.equals("ACCEPTED")) return true;
-		else {
+		if (login != null && login.equals("ACCEPTED")) return true;
+		else if (login != null && login.equals("DECLINED")){
 			JOptionPane.showMessageDialog(null, "User already exists. Please try again");
 			return false;
 		}
+		return false;
 	}
 	
 	void setUpGUILoginClient() {

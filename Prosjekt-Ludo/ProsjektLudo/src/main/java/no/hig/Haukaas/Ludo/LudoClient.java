@@ -49,6 +49,8 @@ public class LudoClient extends JFrame {
 	private JButton spillEtSpillButton;
 	private JButton chatButton;
 	
+	private String clientUserName;
+	
     /**
 	 * Constructor for the Ludo client. 
 	 * Makes a JFrame window where players can interact with each other and join games.
@@ -57,14 +59,15 @@ public class LudoClient extends JFrame {
 	 * @param socket	Connection to the server
 	 * @param spillerID	PlayerID retrived from the Database.
 	 */
-	public LudoClient(String host, Socket socket, BufferedWriter writer, BufferedReader reader, int spillerID) {
+	public LudoClient(String host, Socket socket, BufferedWriter output, BufferedReader input, int spillerID, String userName) {
 		super("Ludo Klient");
 		
-		output = writer;
-		input = reader;
+		this.output = output;
+		this.input = input;
 		ludoClientHost = host;
 		connection = socket;
 		playerID = spillerID;
+		this.clientUserName = userName;
 		
 		setUpGUILudoClient();
 					
@@ -93,8 +96,9 @@ public class LudoClient extends JFrame {
 	
 	public void doChatButtonListener() {
 		setVisible(false);
-		ChatClient chatClient = new ChatClient(ludoClientHost, connection, output, input);
+		ChatClient chatClient = new ChatClient(ludoClientHost, connection, output, input, clientUserName);
 		chatClient.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//chatClient.processConnection();
 	}
 	
 	public void setUpGUILudoClient() {

@@ -15,6 +15,7 @@ public class Player {
 	private BufferedWriter output;
 	
 	private String name;
+	private int playerID;
 
 	public Player(Socket connection) throws IOException {
 		this.connection = connection;
@@ -60,6 +61,14 @@ public class Player {
 	}
 	
 	/**
+	 * Returns the playerID
+	 * @return playerID
+	 */
+	public int returnID(){
+		return playerID;
+	}
+	
+	/**
 	 * The function read from the input two messages. Then it goes threw several if, else if's
 	 * to check what the message contains. If the message contains the correct keyword
 	 * the message data will then be checked against the database. If the database
@@ -83,6 +92,7 @@ public class Player {
 							
 				login = DatabaseHandler.userLogin(name, tempPass.substring(10));
 				if(login > 0) {		// checks the value given by the database
+					playerID = login;
 					output.write(login);	//Sends message back to client
 					output.newLine();
 					output.flush();
@@ -104,7 +114,7 @@ public class Player {
 					output.write("ACCEPTED");	// Sends an accepted message back to client
 					output.newLine();
 					output.flush();
-					return true;
+					return false;
 				}
 				else {
 					output.write("DECLINED");	// sends an declined message back to client
