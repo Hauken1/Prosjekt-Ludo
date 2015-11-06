@@ -62,7 +62,7 @@ public class Chat extends JFrame {
 	    add(textToSend, BorderLayout.SOUTH);
 	    // Add an actionlistener to the textfield
 	    textToSend.addActionListener(e -> {
-	    	System.out.println("Chat: " + chatName + ":" + e.getActionCommand() +"\n");
+	    	System.out.println("Chat: " + chatName + ":" + e.getActionCommand() +"\n"); 
 	        sendText(chatName + ":" + e.getActionCommand());
 	        textToSend.setText("");
 	    });

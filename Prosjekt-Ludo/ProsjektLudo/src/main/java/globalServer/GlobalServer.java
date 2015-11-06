@@ -146,7 +146,9 @@ public class GlobalServer extends JFrame{
 					if (p.loginChecker()) {
 						displayMessage("PLAYER CONNECTED: " + p.returnName() + "\n");
 						
-						p.sendText("GlobalChatRoomJOIN:" + p.returnName());
+						for (int i=0; i<groupChatList.size(); i++) {
+							p.sendText(groupChatList.get(i)+ "JOIN:" + p.returnName());
+						}
 						synchronized (player) {
 							player.add(p);
 							Iterator<Player> i = player.iterator();

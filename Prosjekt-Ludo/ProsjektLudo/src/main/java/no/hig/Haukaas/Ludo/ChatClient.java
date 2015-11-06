@@ -54,7 +54,6 @@ public class ChatClient extends JFrame{
     private DefaultListModel<String> participantsModelChat;
 	
     private JTabbedPane tabs;
-    private JTable GUI;
     
 	public ChatClient(String host, Socket socket, BufferedWriter output, BufferedReader input, String userName) {
 		
@@ -64,51 +63,43 @@ public class ChatClient extends JFrame{
 		this.input = input;
 		this.clientUserName = userName;
 		
-		tabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+		tabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT); //Lagger en ny tabbPane
 		
-		addChat(null);
+		addChat(null); // Legger bare til noe i group chat listen for å få å kunne kjøre for loop
 		
-		/*
-		Chat mainChat = new Chat(output, input, "GlobalChatRoom", clientUserName);
-		chatList.add(mainChat);
-		addChat(mainChat.returnName());
-		sendText(mainChat + "JOIN:" + clientUserName);
-		*/
-		
-		
-		
-		newChatGroup = new JButton("New chat group");
+		newChatGroup = new JButton("New chat group");	//JButton knapp for ny chat
 		newChatGroup.setPreferredSize(new Dimension(200, 100));
 		add(newChatGroup, BorderLayout.EAST);
 		
+			// Legg til listener for om vinduet
 		addWindowListener(new WindowAdapter() {
 	    	@Override
 	    	public void windowClosing(WindowEvent e) {
-	    		sendText(">>>LOGOUT<<<");
-	    		//executorService.shutdown();
+	    		sendText(">>>LOGOUT<<<");	//Sender melding til serveren om logout
 	    	}
 		});
 		
+			// action listener for newChatGroup 
 		ActionListener chatButtonListener = new ActionListener() {
 			
 			public void actionPerformed(ActionEvent event) {
 				groupChatName = JOptionPane.showInputDialog("Group chat name");
-				if (groupChatName != null && !groupChatName.equals("")) {
-					sendText("NEWGROUPCHAT:" + groupChatName);	
+				if (groupChatName != null && !groupChatName.equals("")) { //Passer på at noe blir skrevet in
+					sendText("NEWGROUPCHAT:" + groupChatName);	//Sender melding om ny group chat skal lages med navn
 				}
 			}		
 		}; 
 		newChatGroup.addActionListener(chatButtonListener);
 		
-        // Set up the list of participants
+        // List for håndtering av chate grupper navn
         chatGroups = new JList<String>(chatGroupsModel = new DefaultListModel<String>());
         chatGroups.setFixedCellWidth(160);
         chatGroups.setFont(new Font("Arial", Font.PLAIN, 14));
         add(new JScrollPane(chatGroups), BorderLayout.EAST);
    
-		executorService = Executors.newCachedThreadPool();
-		processConnection();
-		executorService.shutdown();	
+		executorService = Executors.newCachedThreadPool(); // Lager et pool av threads for bruk
+		processConnection(); // Starter en ny evighets tråd som tar seg av meldinger fra server
+		executorService.shutdown();	// Dreper tråden når klassen dør
 		
 		add(newChatGroup, BorderLayout.NORTH);
 		add(tabs, BorderLayout.CENTER);
@@ -117,12 +108,17 @@ public class ChatClient extends JFrame{
 		setVisible(true);
 	}
 	
+	/**
+	 * Lager et nytt box object med elementer for håndtering av
+	 * vising av chat og skrive in chat melding som skal sendes
+	 * og legge til ny brukere i en oversikt liste
+	 * @param chatName Tar navnet på chaten
+	 * @return Box tab
+	 */
 	private Box addBoxToLayout(String chatName) {
 		
 		
 		Box tmp = Box.createVerticalBox();
-		
-		
 		
 		// Set up the textarea used to display all messages
 	    dialog = new JTextArea();
@@ -143,9 +139,8 @@ public class ChatClient extends JFrame{
 	    tmp.add(textToSend);
 	    // Add an actionlistener to the textfield
 	    textToSend.addActionListener(e -> {
-	    	System.out.println("Chat: " + groupChatName + ":" + e.getActionCommand() +"\n");
-	        sendText(groupChatName + ":" + e.getActionCommand());
-	        textToSend.setText("");
+	        sendText(groupChatName + ":" + e.getActionCommand()); //Sender chat melding til alle brukere
+	        textToSend.setText(""); // Setter feltet til ingenting etter noe sendt.
 	    });
 	    textToSend.requestFocus();
 	    
@@ -154,51 +149,43 @@ public class ChatClient extends JFrame{
 		return tmp;
 	}
 	
-	private boolean processChatRequest(String respons) {
-		System.out.println("Hva er responsen: " + respons);
-		if (respons != null && respons.equals("ERRORCHAT")) {
-			JOptionPane.showMessageDialog(null, "Chat group already exits");
-			return false;
-		}
-		else if (respons != null && respons.startsWith("NEWGROUPCHAT:"))
-			return true;
-		
-		return true;
-	}
-	
+	/**
+	 * Denne tar seg av håndtering av meldinger som blir sendt fra server.
+	 * Looper hele tiden og lager seg en ny tråd når en ny oppgave skal gjøres.
+	 */
 	private void processConnection() {
 		executorService.execute(() -> {
 			while (true) {
 				try {
 	                String tmp = input.readLine();
 	                
-	                if (tmp.startsWith("NEWGROUPCHAT:")) { 
+	                if (tmp.startsWith("NEWGROUPCHAT:")) { //Legger til ny chatTab
 	                	
 	                	tabs.addTab(tmp.substring(13), addBoxToLayout(tmp.substring(13)));
 	                	addChat(tmp.substring(13));
 	                	           	
-	                	sendText(tmp.substring(13) + "JOIN:" + clientUserName);
+	                	sendText(tmp.substring(13) + "JOIN:" + clientUserName); // Sender ut at brukern også vil joine chaten.
 	                }
-	                else if (tmp.equals("ERRORCHAT")) {
+	                else if (tmp.equals("ERRORCHAT")) {	// Forteller at chaten finnes allerede
 	                	JOptionPane.showMessageDialog(this, "Chat group already exits");
 	                }
 	                	                
-	                for (int i=1; i<chatGroupsModel.size(); i++) {
+	                for (int i=1; i<chatGroupsModel.size(); i++) { // Looper igjen alle groupChatene som finnes i lsiten
 	                	
-		                if (tmp.startsWith(chatGroupsModel.get(i) + "JOIN:")){
-		                	if (participantsModelChat.contains(clientUserName)) {
-		                		addUser(tmp.substring(chatGroupsModel.get(i).length() + 5));
-		                		removeUser(clientUserName);
-		                		sendText(chatGroupsModel.get(i) + "JOIN:" + clientUserName);
+		                if (tmp.startsWith(chatGroupsModel.get(i) + "JOIN:")){	// Sjekker om noen har lyst å joine
+		                	if (participantsModelChat.contains(clientUserName)) {	//Vist personen finnes allerede
+		                		addUser(tmp.substring(chatGroupsModel.get(i).length() + 5));	//Legger til brukern som kom in
+		                		removeUser(clientUserName);	//Fjerner klient brukern fra listen
+		                		sendText(chatGroupsModel.get(i) + "JOIN:" + clientUserName); // Sender klient som lyst å joine til chaten
 		                	}
 		                	else
-		                		addUser(tmp.substring(chatGroupsModel.get(i).length() + 5));	                	
+		                		addUser(tmp.substring(chatGroupsModel.get(i).length() + 5));	//Legger til bruker vist ikke finnes allerede	                	
 		                }
-		                else if (tmp.startsWith(chatGroupsModel.get(i) + "OUT:")) { // User is logging out 
-		                    removeUser(tmp.substring(chatGroupsModel.get(i).length() + 4));
+		                else if (tmp.startsWith(chatGroupsModel.get(i) + "OUT:")) { // Mottar melding om at noen har logget ut
+		                    removeUser(tmp.substring(chatGroupsModel.get(i).length() + 4)); // Fjerner bruker fra listen
 		                }
-		                else if (tmp.startsWith(chatGroupsModel.get(i) + ":")) { // All other messages
-		                    displayMessage(tmp.substring(chatGroupsModel.get(i).length() + 1) + "\n");
+		                else if (tmp.startsWith(chatGroupsModel.get(i) + ":")) { // Tar alle andre meldinger
+		                    displayMessage(tmp.substring(chatGroupsModel.get(i).length() + 1) + "\n"); //Vist det i JTextArea for chat
 		                }
 	                }
 	            } catch (IOException ioe) {
@@ -206,12 +193,6 @@ public class ChatClient extends JFrame{
 	            }
 			}
 		});
-	}
-	
-	public String read() throws IOException {
-		if (input.ready())
-			return input.readLine();
-		return null;
 	}
 
     /**
@@ -226,10 +207,8 @@ public class ChatClient extends JFrame{
 
     
     /**
-     * Used to add a user to the user list in a thread safe manner
-     * 
-     * @param username
-     *            the name of the user to add to the list
+     * Used to add a chat to the chat list in a thread safe manner
+     * @param chatName legger til ny chat i listen
      */
     private void addChat(String chatName) {
     	
