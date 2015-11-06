@@ -44,7 +44,9 @@ public class LoginClient extends JFrame {
 	private JButton registerButton;
 	private Socket connection; //connection to server
 	private BufferedWriter output; //output from server
-	private BufferedReader input; //input to server
+	private BufferedReader input; //input to server¨
+	
+	private String clientUserName;
 	
 	/**
 	 * Constructor for the login Client. Makes necessary objects/elements
@@ -147,8 +149,9 @@ public class LoginClient extends JFrame {
 					reconnect();	//reconnets to the server
 				}
 				if (n > 0) {	//Logger inn, hvis true
+					clientUserName = textUsername;
 					setVisible(false);
-					LudoClient client = new LudoClient(LudoClienthost, connection, output, input, n);
+					LudoClient client = new LudoClient(LudoClienthost, connection, output, input, n, clientUserName);
 					client.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
 					
 				}
@@ -207,11 +210,12 @@ public class LoginClient extends JFrame {
 	 * @return return true if the registration process is successful, if not return false. 
 	 */
 	private boolean processLogin(String login) {
-		if (login.equals("ACCEPTED")) return true;
-		else {
+		if (login != null && login.equals("ACCEPTED")) return true;
+		else if (login != null && login.equals("DECLINED")){
 			JOptionPane.showMessageDialog(null, "User already exists. Please try again");
 			return false;
 		}
+		return false;
 	}
 	
 	void setUpGUILoginClient() {
