@@ -15,7 +15,9 @@ import java.net.Socket;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 
+import javax.security.auth.x500.X500Principal;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -43,6 +45,7 @@ public class GameClient extends JFrame {
     private int diceValue;
     private JLabel dieLabel;
     private JLabel dieTextLabel;
+    private JButton dieRoller; 
     private ImageIcon die1;
     private ImageIcon die2;
     private ImageIcon die3;
@@ -50,14 +53,27 @@ public class GameClient extends JFrame {
     private ImageIcon die5;
     private ImageIcon die6;
     
+    private JLabel greenPlayer;
+    private JLabel yellowPlayer;
+    private JLabel redPlayer;
+    private JLabel bluePlayer;
+    
+    private JButton pawn1; 
+    private JButton pawn2; 
+    private JButton pawn3; 
+    private JButton pawn4; 
+    
     private final String throwDiceText;
     private final String receiveDiceText;
     private final String turnOwnerText;
     private final String makeMoveText;
     
-	private JButton throwDiceButton;
 	private int turnOwner = 2;
 	private int spiller = 1;
+	private int pawnToMove = 0;
+	private boolean gameOver = false;
+	private boolean pawnChoice = false;
+	private Semaphore sema = new Semaphore(1);
 	
 	public GameClient(String host, Socket socket, int spillerID, BufferedWriter writer, BufferedReader reader) {
 
@@ -73,9 +89,17 @@ public class GameClient extends JFrame {
 		turnOwnerText = "TURNOWNER:";
 		makeMoveText = "MOVE:";
 		
-		throwDiceButton = new JButton("Throw dice");
-		throwDiceButton.setBounds(10, 80, 50, 25);
-		add(throwDiceButton, BorderLayout.NORTH);
+		setUpGUI();	
+		
+		executorService = Executors.newCachedThreadPool();
+		processConnection();
+		executorService.shutdown();
+
+		setSize(getPreferredSize());
+		setVisible(true);
+	}
+	
+	private void setUpGUI() {
 		
 		try {	//Prøver å lage spill brettet
 			board = new LudoBoard();
@@ -84,14 +108,6 @@ public class GameClient extends JFrame {
 		} catch (Exception e) {
 			System.out.println("Noe feil med brettet");
 		}
-		
-		throwDiceButton.addActionListener(e -> {
-			if (turnOwner == spiller) {
-				sendText(throwDiceText + spiller);
-			} else {
-				displayMessage("It's not your turn!\n");
-			}
-		});
 		
 		typeArea = new JTextArea();
 		typeArea.setEditable(true);
@@ -114,31 +130,35 @@ public class GameClient extends JFrame {
 		
 		JPanel gameGUIComponents = new JPanel();
 		JPanel players = new JPanel();
-		players.setPreferredSize(new Dimension(200,200));
+		players.setPreferredSize(new Dimension(300,300));
 		players.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), "Players"));
-		players.setBackground(color[6]);
+		players.setBackground(color[5]);
 		
-		JLabel greenPlayer = new JLabel("Green player");
+		greenPlayer = new JLabel("Green player");
 		greenPlayer.setBackground(Color.RED);
 		greenPlayer.setFont(new Font("Serif", Font.BOLD, 20));
+		greenPlayer.setForeground(Color.BLACK);
 		greenPlayer.setBorder(BorderFactory.createLineBorder(color[0], 2, true));
 		greenPlayer.setOpaque(true);
 		greenPlayer.setBackground(color[1]);
 		
-		JLabel yellowPlayer = new JLabel("Yellow player");
+		yellowPlayer = new JLabel("Yellow player");
 		yellowPlayer.setFont(new Font("Serif", Font.BOLD, 20));
+		yellowPlayer.setForeground(Color.BLACK);
 		yellowPlayer.setBorder(BorderFactory.createLineBorder(color[0], 2, true));
 		yellowPlayer.setOpaque(true);
 		yellowPlayer.setBackground(color[2]);
 		
-		JLabel redPlayer = new JLabel("Red player: Your turn");
+		redPlayer = new JLabel("Red player: Your turn");
 		redPlayer.setFont(new Font("Serif", Font.BOLD, 20));
+		redPlayer.setForeground(Color.WHITE);
 		redPlayer.setBorder(BorderFactory.createLineBorder(color[0], 2, true));
 		redPlayer.setOpaque(true);
 		redPlayer.setBackground(color[3]);
 		
-		JLabel bluePlayer = new JLabel("Blue player");
+		bluePlayer = new JLabel("Blue player");
 		bluePlayer.setFont(new Font("Serif", Font.BOLD, 20));
+		bluePlayer.setForeground(Color.WHITE);
 		bluePlayer.setBorder(BorderFactory.createLineBorder(color[0], 2, true));
 		bluePlayer.setOpaque(true);
 		bluePlayer.setBackground(color[4]);
@@ -149,13 +169,13 @@ public class GameClient extends JFrame {
 		playerLayout.weightx = 1;
 		playerLayout.weighty = 1;
 		playerLayout.gridy = 0;
-		players.add(greenPlayer, playerLayout);
+		players.add(redPlayer, playerLayout);
 		playerLayout.gridy = 1;
 		players.add(yellowPlayer, playerLayout);
 		playerLayout.gridy = 2;
-		players.add(redPlayer, playerLayout);
-		playerLayout.gridy = 3;
 		players.add(bluePlayer, playerLayout);
+		playerLayout.gridy = 3;
+		players.add(greenPlayer, playerLayout);
 		
 		JPanel diePanel = new JPanel();
 		diePanel.setLayout(new GridBagLayout());
@@ -166,8 +186,6 @@ public class GameClient extends JFrame {
 		dieLabel = new JLabel();
 		dieTextLabel = new JLabel();
 		
-		//dieLabel1.setIcon(die);
-
 		diePanelConstraints.anchor = GridBagConstraints.CENTER;
 		diePanelConstraints.gridy = 0;
 		diePanelConstraints.ipady = 20;
@@ -176,7 +194,7 @@ public class GameClient extends JFrame {
 		diePanelConstraints.gridy = 1;
 		diePanel.add(dieLabel, diePanelConstraints);
 		
-		JButton dieRoller = new JButton(); 
+		dieRoller = new JButton(); 
 		dieRoller.setPreferredSize(new Dimension(200,200));
 		dieRoller.setText("Throw Dice");
 		dieRoller.setFont(new Font("Serif", Font.BOLD, 20));
@@ -190,59 +208,95 @@ public class GameClient extends JFrame {
 		};
 		dieRoller.addActionListener(rollDice);
 		
+		JPanel pawnPanel = new JPanel();
+		pawnPanel.setLayout(new GridBagLayout());
+		GridBagConstraints pawnPanelGridBagConstraint = new GridBagConstraints();
+		
+		pawn1 = new JButton();
+		pawn1.setText("Pawn 1");
+		pawn1.setPreferredSize(new Dimension(100,100));
+		ActionListener pawn1ActionListener = new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				pawnToMove = 0;
+				processRoll(diceValue);
+				pawnChoice = true;
+				
+			}
+		};
+		pawn1.addActionListener(pawn1ActionListener);
+		
+		pawn2 = new JButton();
+		pawn2.setText("Pawn 2");
+		pawn2.setPreferredSize(new Dimension(100,100));
+		ActionListener pawn2ActionListener = new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				pawnToMove = 1;
+				processRoll(diceValue);
+				pawnChoice = true;
+			}
+		};
+		pawn2.addActionListener(pawn2ActionListener);
+		
+		pawn3 = new JButton();
+		pawn3.setText("Pawn 3");
+		pawn3.setPreferredSize(new Dimension(100,100));
+		ActionListener pawn3ActionListener = new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				pawnToMove = 2;
+				processRoll(diceValue);
+				pawnChoice = true;
+				
+			}
+		};
+		pawn3.addActionListener(pawn3ActionListener);
+		
+		pawn4 = new JButton();
+		pawn4.setText("Pawn 4");
+		pawn4.setPreferredSize(new Dimension(100,100));
+		ActionListener pawn4ActionListener = new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				pawnToMove = 3;
+				processRoll(diceValue);
+				pawnChoice = true;
+				
+			}
+		};
+		pawn4.addActionListener(pawn4ActionListener);
+		
+		pawnPanelGridBagConstraint.gridy = 0;
+		pawnPanelGridBagConstraint.gridx = 0;
+		pawnPanel.add(pawn1,pawnPanelGridBagConstraint);
+		pawnPanelGridBagConstraint.gridy = 0;
+		pawnPanelGridBagConstraint.gridx = 1;
+		pawnPanel.add(pawn2, pawnPanelGridBagConstraint);
+		pawnPanelGridBagConstraint.gridy = 1;
+		pawnPanelGridBagConstraint.gridx = 0;
+		pawnPanel.add(pawn3, pawnPanelGridBagConstraint);
+		pawnPanelGridBagConstraint.gridy = 1;
+		pawnPanelGridBagConstraint.gridx = 1;
+		pawnPanel.add(pawn4, pawnPanelGridBagConstraint);
+		
 		gameGUIComponents.setLayout(new BorderLayout());
 		gameGUIComponents.add(players, BorderLayout.NORTH);
 		gameGUIComponents.add(diePanel, BorderLayout.CENTER);
 		gameGUIComponents.add(dieRoller, BorderLayout.SOUTH);
+		gameGUIComponents.add(pawnPanel, BorderLayout.EAST);
 		
-		add(gameGUIComponents, BorderLayout.WEST);	
-		
-		executorService = Executors.newCachedThreadPool();
-		processConnection();
-		executorService.shutdown();
-
-		setSize(getPreferredSize());
-		setVisible(true);
-	}
-	
-	private void setUpGUI() {
+		add(gameGUIComponents, BorderLayout.WEST);
 		
 	}
 	
 	private void rollDiceActionListener() {
+		
 		Random rng = new Random();
 		diceValue = rng.nextInt(6) + 1;
 		
 		//diceValue = 6;	//6'er for testing
-		
-		int bonde = rng.nextInt(4);
-		
+			
 		if (turnOwner == spiller) {
 			sendText(throwDiceText + spiller);
 		} else {
-			displayMessage("It's not your turn!\n");
-		}
-		
-		if ( turnOwner == 1) {		
-			board.greenPawns.get(bonde).changeLocation(diceValue);
-			
-			turnOwner ++;
-			repaint();
-			}
-		else if(turnOwner == 2) {
-			board.redPawns.get(bonde).changeLocation(diceValue);
-			turnOwner ++;
-			repaint();
-		}
-		else if (turnOwner == 3) {
-			board.yellowPawns.get(bonde).changeLocation(diceValue);
-			turnOwner ++;
-			repaint();
-		}
-		else if (turnOwner == 4) {
-			board.bluePawns.get(bonde).changeLocation(diceValue);
-			turnOwner = 1;
-			repaint();
+		//	displayMessage("It's not your turn!\n");
 		}
 		
 		switch (diceValue) {
@@ -270,9 +324,77 @@ public class GameClient extends JFrame {
 			dieTextLabel.setText("You got a: ");
 			dieLabel.setIcon(die6);
 			break;
+		}	
+		
+		if(gameOver) {
+			dieRoller.setEnabled(false);
+			dieRoller.setText("GG");
 		}
 		
 	}
+	
+	private void processRoll(int diceVal) {
+		int inGoal;
+		if ( turnOwner == 1) {	//Green player
+			board.greenPawns.get(pawnToMove).changeLocation(diceValue);
+			inGoal = board.greenPawnsInGoal.size();
+			if (inGoal == 4) {
+				displayMessage("Green Player won");
+				System.out.println(("You won"));
+				gameOver = true;
+			}
+			turnOwner ++;
+			greenPlayer.setText("Green player:");
+			redPlayer.setText("Red player: Your turn!");
+			repaint();
+			}
+		else if(turnOwner == 2) { //Red player
+			try {
+				board.redPawns.get(pawnToMove).changeLocation(diceValue);
+				inGoal = board.redPawnsInGoal.size();
+				if (inGoal == 4) {
+						System.out.println(("You won"));
+						gameOver = true;
+						displayMessage("Red Player won");
+				}
+				pawnToMove = 0;
+				pawnChoice = false;
+			} catch (Exception e ) {
+				System.out.println("Goalerror");
+			}
+			turnOwner ++;
+			redPlayer.setText("Red player:");
+			yellowPlayer.setText("Yellow player: Your Turn!");
+			repaint();
+		}
+		else if (turnOwner == 3) { //Yellow player
+			board.yellowPawns.get(pawnToMove).changeLocation(diceValue);
+			inGoal = board.yellowPawnsInGoal.size();
+			if (inGoal == 4) {
+				displayMessage("Yellow Player won");
+				System.out.println(("You won"));
+				gameOver = true;
+			}
+			turnOwner ++;
+			yellowPlayer.setText("Yellow player:");
+			bluePlayer.setText("Blue player: Your turn!");
+			repaint();
+		}
+		else if (turnOwner == 4) { //Blue player
+			board.bluePawns.get(pawnToMove).changeLocation(diceValue);
+			inGoal = board.bluePawnsInGoal.size();
+			if (inGoal == 4) {
+				displayMessage("Blue Player won");
+				System.out.println(("You won"));
+				gameOver = true;
+			}
+			bluePlayer.setText("Blue player:");
+			greenPlayer.setText("Green player: Your Turn!");
+			turnOwner = 1;
+			repaint();
+		}
+	}
+		
 	private void processConnection() {
 		executorService.execute(() -> {
 			while (true) {

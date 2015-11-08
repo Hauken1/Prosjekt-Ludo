@@ -65,10 +65,18 @@ public class LudoBoard extends JPanel {
 	private Vector<Point> coordinatesYellow= new Vector<>();
 	private Vector<Point> coordinatesBlue = new Vector<>();
 	
+	//Arraylist that keeps track of where the pawns of each color is on the board
 	final ArrayList<Pawned> greenPawns = new ArrayList<Pawned>();
 	final ArrayList<Pawned> yellowPawns = new ArrayList<Pawned>();
 	final ArrayList<Pawned> redPawns = new ArrayList<Pawned>();
 	final ArrayList<Pawned> bluePawns = new ArrayList<Pawned>();
+	
+	//Arralist that keeps track of how many pawns of each color is in the goal
+	//If all pawns of a color is in their respectively arrayslists, that player wins.
+	final ArrayList<Pawned> greenPawnsInGoal = new ArrayList<Pawned>();
+	final ArrayList<Pawned> yellowPawnsInGoal = new ArrayList<Pawned>();
+	final ArrayList<Pawned> redPawnsInGoal = new ArrayList<Pawned>();
+	final ArrayList<Pawned> bluePawnsInGoal = new ArrayList<Pawned>();
 	
 	/**
 	 * Constructor for the ludo board
@@ -77,6 +85,7 @@ public class LudoBoard extends JPanel {
 	public LudoBoard() {
 	
 		try {
+			
 			/*
 			 * Kan bruke Icon isteden for 
 			 * testDraw = ImageIO.read(new File("bluePawn1.png"));
@@ -490,108 +499,9 @@ public class LudoBoard extends JPanel {
 		boardPane.add(board, new Integer(0));
 		boardSize = board.getPreferredSize();	
 		board.setBounds(0, 0, boardSize.width, boardSize.height); //Gives the image some extra space
-		/*		
-		JPanel gameGUIComponents = new JPanel();
-		JPanel players = new JPanel();
-		players.setPreferredSize(new Dimension(200,200));
-		players.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), "Players"));
-		players.setBackground(color[6]);
 		
-		JLabel greenPlayer = new JLabel("Green player");
-		greenPlayer.setBackground(Color.RED);
-		greenPlayer.setFont(new Font("Serif", Font.BOLD, 20));
-		greenPlayer.setBorder(BorderFactory.createLineBorder(color[0], 2, true));
-		greenPlayer.setOpaque(true);
-		greenPlayer.setBackground(color[1]);
-		
-		JLabel yellowPlayer = new JLabel("Yellow player");
-		yellowPlayer.setFont(new Font("Serif", Font.BOLD, 20));
-		yellowPlayer.setBorder(BorderFactory.createLineBorder(color[0], 2, true));
-		yellowPlayer.setOpaque(true);
-		yellowPlayer.setBackground(color[2]);
-		
-		JLabel redPlayer = new JLabel("Red player");
-		redPlayer.setFont(new Font("Serif", Font.BOLD, 20));
-		redPlayer.setBorder(BorderFactory.createLineBorder(color[0], 2, true));
-		redPlayer.setOpaque(true);
-		redPlayer.setBackground(color[3]);
-		
-		JLabel bluePlayer = new JLabel("Blue player");
-		bluePlayer.setFont(new Font("Serif", Font.BOLD, 20));
-		bluePlayer.setBorder(BorderFactory.createLineBorder(color[0], 2, true));
-		bluePlayer.setOpaque(true);
-		bluePlayer.setBackground(color[4]);
-		
-		players.setLayout(new GridBagLayout());
-		GridBagConstraints playerLayout = new GridBagConstraints();
-		playerLayout.fill = GridBagConstraints.HORIZONTAL;
-		playerLayout.weightx = 1;
-		playerLayout.weighty = 1;
-		playerLayout.gridy = 0;
-		players.add(greenPlayer, playerLayout);
-		playerLayout.gridy = 1;
-		players.add(yellowPlayer, playerLayout);
-		playerLayout.gridy = 2;
-		players.add(redPlayer, playerLayout);
-		playerLayout.gridy = 3;
-		players.add(bluePlayer, playerLayout);
-		
-		JPanel diePanel = new JPanel();
-		diePanel.setLayout(new GridBagLayout());
-		GridBagConstraints diePanelConstraints = new GridBagConstraints();
-		diePanel.setPreferredSize(new Dimension(200, 200));
-		diePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color[5]), "Die"));
-		
-		JLabel dieLabel1 = new JLabel();
-		
-		dieLabel1.setIcon(die);
-
-		diePanelConstraints.anchor = GridBagConstraints.CENTER;
-		diePanelConstraints.gridy = 0;
-		diePanel.add(dieLabel1, diePanelConstraints);
-		
-		JButton dieRoller = new JButton(); 
-		dieRoller.setPreferredSize(new Dimension(200,200));
-		dieRoller.setText("Red Players turn");
-		dieRoller.setFont(new Font("Serif", Font.BOLD, 20));
-		
-		ActionListener rollDice = new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				//TODO MOUSELISTENER -- KLIKKE PÅ BONDE -> BEVEGE DEN
-				//Dette er kun for testing purposes
-				Random rng = new Random();
-				diceValue = rng.nextInt(6) + 1;
-				diceValue = 6;	//6'er for testing
-				int player = rng.nextInt(4) +1 ;
-				int bonde = rng.nextInt(4);
-				if ( player == 1) {		
-					greenPawns.get(bonde).changeLocation(diceValue);
-					repaint();
-					}
-				else if(player == 2) {
-					redPawns.get(bonde).changeLocation(diceValue);
-					repaint();
-				}
-				else if (player == 3) {
-					yellowPawns.get(bonde).changeLocation(diceValue);
-					repaint();
-				}
-				else if (player == 4) {
-					bluePawns.get(bonde).changeLocation(diceValue);
-					repaint();
-				}
-			}
-		};
-		dieRoller.addActionListener(rollDice);
-		
-		gameGUIComponents.setLayout(new BorderLayout());
-		gameGUIComponents.add(players, BorderLayout.NORTH);
-		gameGUIComponents.add(diePanel, BorderLayout.CENTER);
-		gameGUIComponents.add(dieRoller, BorderLayout.SOUTH);
-		*/
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		add(boardPane);
-		//add(gameGUIComponents);	
 	}
 	
 	public static ImageIcon resizeImageIcon(ImageIcon icon, Integer width, Integer height) {
@@ -649,35 +559,95 @@ public class LudoBoard extends JPanel {
 	}
 	
 	void paintPawns(Graphics2D g2d) {
-		for (int i = 0; i< 4; i++) {
-				int loc = greenPawns.get(i).returnLocation();
+			try {
 				float thickness = 4;
 				g2d.setStroke(new BasicStroke(thickness));
 				
-				g2d.setColor(color[0]);
-				g2d.drawOval(coordinatesGreen.elementAt(loc).x, coordinatesGreen.elementAt(loc).y, 40, 40);
-				g2d.setColor(color[1]);
-				g2d.fillOval(coordinatesGreen.elementAt(loc).x, coordinatesGreen.elementAt(loc).y, 40, 40);
-				
-				loc = yellowPawns.get(i).returnLocation();
-				g2d.setColor(color[0]);
-				g2d.drawOval(coordinatesYellow.elementAt(loc).x, coordinatesYellow.elementAt(loc).y, 40, 40);
-				g2d.setColor(color[2]);
-				g2d.fillOval(coordinatesYellow.elementAt(loc).x, coordinatesYellow.elementAt(loc).y, 40, 40);
-				
-				loc = redPawns.get(i).returnLocation();
-				g2d.setColor(color[0]);
-				g2d.drawOval(coordinatesRed.elementAt(loc).x, coordinatesRed.elementAt(loc).y, 40, 40);
-				g2d.setColor(color[3]);
-				g2d.fillOval(coordinatesRed.elementAt(loc).x, coordinatesRed.elementAt(loc).y, 40, 40);
-				
-				loc = bluePawns.get(i).returnLocation();
-				g2d.setColor(color[0]);
-				g2d.drawOval(coordinatesBlue.elementAt(loc).x, coordinatesBlue.elementAt(loc).y, 40, 40);
-				g2d.setColor(color[4]);
-				g2d.fillOval(coordinatesBlue.elementAt(loc).x, coordinatesBlue.elementAt(loc).y, 40, 40);
+				for (int j = 0; j < greenPawns.size() ; j++) {	
+					int l = greenPawns.get(j).returnLocation();
+					g2d.setColor(color[0]);
+					g2d.drawOval(coordinatesGreen.elementAt(l).x, coordinatesGreen.elementAt(l).y, 40, 40);
+					g2d.setColor(color[1]);
+					g2d.fillOval(coordinatesGreen.elementAt(l).x, coordinatesGreen.elementAt(l).y, 40, 40);
+					Font f = new Font("Dialog", Font.PLAIN, 20);
+					g2d.setFont(f);
+					g2d.setColor(color[0]);
+					g2d.drawString("" + (j+1), coordinatesGreen.elementAt(l).x+15, coordinatesGreen.elementAt(l).y+25);
+				}
+				for (int j = 0; j < yellowPawns.size() ; j++) {	
+					int l = yellowPawns.get(j).returnLocation();
+					g2d.setColor(color[0]);
+					g2d.drawOval(coordinatesYellow.elementAt(l).x, coordinatesYellow.elementAt(l).y, 40, 40);
+					g2d.setColor(color[2]);
+					g2d.fillOval(coordinatesYellow.elementAt(l).x, coordinatesYellow.elementAt(l).y, 40, 40);
+					Font f = new Font("Dialog", Font.PLAIN, 20);
+					g2d.setFont(f);
+					g2d.setColor(color[0]);
+					g2d.drawString("" + (j+1), coordinatesYellow.elementAt(l).x+15, coordinatesYellow.elementAt(l).y+25);
+				}
+				for (int j = 0; j < redPawns.size() ; j++) {	
+					int l = redPawns.get(j).returnLocation();
+					g2d.setColor(color[0]);
+					g2d.drawOval(coordinatesRed.elementAt(l).x, coordinatesRed.elementAt(l).y, 40, 40);
+					g2d.setColor(color[3]);
+					g2d.fillOval(coordinatesRed.elementAt(l).x, coordinatesRed.elementAt(l).y, 40, 40);
+					Font f = new Font("Dialog", Font.PLAIN, 20);
+					g2d.setFont(f);
+					g2d.setColor(color[0]);
+					g2d.drawString("" + (j+1), coordinatesRed.elementAt(l).x+15, coordinatesRed.elementAt(l).y+25);
+				}
+				for (int j = 0; j < bluePawns.size() ; j++) {	
+					int l = bluePawns.get(j).returnLocation();
+					g2d.setColor(color[0]);
+					g2d.drawOval(coordinatesBlue.elementAt(l).x, coordinatesBlue.elementAt(l).y, 40, 40);
+					g2d.setColor(color[4]);
+					g2d.fillOval(coordinatesBlue.elementAt(l).x, coordinatesBlue.elementAt(l).y, 40, 40);
+					Font f = new Font("Dialog", Font.PLAIN, 20);
+					g2d.setFont(f);
+					g2d.setColor(color[0]);
+					g2d.drawString("" + (j+1), coordinatesBlue.elementAt(l).x+15, coordinatesBlue.elementAt(l).y+25);
+				}
+			} catch (IndexOutOfBoundsException e) {
+				System.out.println("Error try to paint pawn");
+			}	
+	}
+	
+	public int getpawnInGoalLocation(int col) {
+		switch (col) {
+		case 1:
+			for (int j = 0; j < greenPawns.size(); j++) {
+				int l;
+				l = greenPawns.get(j).returnLocation();
+				if (l == 62) {
+					return j;
+				}
+			}
+		case 2:
+			for (int j = 0; j < yellowPawns.size(); j++) {
+				int l;
+				l = yellowPawns.get(j).returnLocation();
+				if (l == 62) {
+					return j;
+				}
+			}
+		case 3:
+			for (int j = 0; j < redPawns.size(); j++) {
+				int l;
+				l = redPawns.get(j).returnLocation();
+				if (l == 62) {
+					return j;
+				}
+			}
+		case 4:
+			for (int j = 0; j < bluePawns.size(); j++) {
+				int l;
+				l = bluePawns.get(j).returnLocation();
+				if (l == 62) {
+					return j;
+				}
+			}
 		}
-		
+		return 5;
 	}
 	/**
 	 * 
@@ -687,10 +657,11 @@ public class LudoBoard extends JPanel {
 	 */
 	public class Pawned {
 		private int location; //location 0-3 er hjemmeplassering.
-		private int homelocation;
-		private int color;	
+		private int homelocation;	//Used so that each pawn knows where it should be places if knocked out
+		private int color;		//Not really needed(?)
 		private Vector<Point> coordinates= new Vector<>();
 		private Color paintColor[] = {Color.BLACK, Color.GREEN, Color.YELLOW, Color.RED, Color.BLUE};
+		private boolean inHome;
 		
 		/**
 		 * Class constructor that makes every pawn and set their starting location
@@ -702,23 +673,26 @@ public class LudoBoard extends JPanel {
 			location = loc; 
 			color = col;
 						
-			if (color == 1) {	
+			if (color == 1) {	//Green pawn
 				Point p = getGreenCoordinates(loc);
-				coordinates.add(new Point(p.x, p.y));	
+				coordinates.add(new Point(p.x, p.y));
+				inHome = true;
 			}
-			 if (color == 2) {
+			 if (color == 2) {	//Yellow pawn
 					
 				Point p = getYellowCoordinates(loc);
 				coordinates.add(new Point(p.x, p.y));
-			
+				inHome = true;
 			 }	
-			if (color == 3) {
+			if (color == 3) {	//Red pawn
 				Point p = getRedCoordinates(loc);
 				coordinates.add(new Point(p.x, p.y));
+				inHome = true;
 			}	
-			if (color == 4) {
+			if (color == 4) {	//Blue pawn
 				Point p = getBlueCoordinates(loc);
 				coordinates.add(new Point(p.x, p.y));
+				inHome = true;
 			}
 		}
 		/**
@@ -736,12 +710,92 @@ public class LudoBoard extends JPanel {
 		public int homeLocation() {
 			return homelocation;
 		}
+		public boolean returnInHome() {
+			return inHome;
+		}
 		/**
 		 * Method that changes a pawns location
 		 * @param n holds the location that the pawns should change to
 		 */
 		public void changeLocation(int n) {
-			location += n; 
+			int loc = location;
+			int temp = loc += n;
+			if ( temp > coordinatesGreen.size() - 1) {	//Does not matter whice coordinate is used here
+				int j;
+				j = temp - 62;
+				location = 62 - j;
+			} 
+			else {
+				if(!inHome) {
+					location += n;;
+					tryAddToGoal();
+				}
+				else {
+					if(n == 6) {
+						location = 4;
+						inHome = false;
+					} else System.out.println("Need to get a 6'er to move the pawn from the homefield");
+				}
+			}
+		}
+		
+		public void tryAddToGoal() {
+			int n;
+			switch (color){
+			case 1:	//Green pawn
+				n = coordinatesGreen.size() - 1  ;
+				if (n == location) {
+					int j;
+					Pawned temp;
+					j = getpawnInGoalLocation(color);
+					if (j < 5) {
+						temp = greenPawns.get(homelocation);
+						greenPawnsInGoal.add(temp);	//Add the pawn that finished to the goalArrayList
+						greenPawns.remove(homelocation);	//remove pawn from the field
+					}
+				}
+				break;
+			case 2:	//Yellow pawn
+				n = coordinatesYellow.size() - 1;
+				if (n == location) {
+					int j;
+					Pawned temp;
+					j = getpawnInGoalLocation(color);
+					if (j < 5) {
+						temp = yellowPawns.get(homelocation);
+						yellowPawnsInGoal.add(temp);
+						yellowPawns.remove(homelocation);
+					}
+				}
+				break;
+			case 3: //Red pawn
+				n = coordinatesRed.size() - 1;
+				if (n == location) {	//Sjekker om den er i mål
+					int j;
+					Pawned temp;
+					j = getpawnInGoalLocation(color);
+					if (j < 5) {
+						temp = redPawns.get(j);
+						redPawnsInGoal.add(temp);
+						redPawns.remove(j);
+					}
+					
+				}
+				break;
+			case 4: //Blue pawn
+				n = coordinatesBlue.size() - 1;
+				if (n == location) {
+					int j;
+					Pawned temp;
+					j = getpawnInGoalLocation(color);
+					if (j < 5) {
+						temp = bluePawns.get(homelocation);
+						bluePawnsInGoal.add(temp);
+						bluePawns.remove(homelocation);
+					}
+				}
+				break;
+			}
 		}
 		
 	} //END OF PAWN CLASS
