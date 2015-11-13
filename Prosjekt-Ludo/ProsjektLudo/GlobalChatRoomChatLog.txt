@@ -1,0 +1,136 @@
+2015-11-13 09:51:39 GlobalChatRoomJOIN:user
+2015-11-13 09:51:43 NEWGROUPCHAT:asd
+2015-11-13 09:51:43 asdJOIN:user
+2015-11-13 09:51:47 asd:user > asdasda
+2015-11-13 09:51:47 asd:user > d
+2015-11-13 09:51:47 asd:user > aa
+2015-11-13 09:51:47 asd:user > sda
+2015-11-13 09:51:47 asd:user > das
+2015-11-13 09:51:48 asd:user > 
+2015-11-13 09:51:50 asd:user > d
+2015-11-13 09:51:50 asd:user > 
+2015-11-13 09:51:59 NEWGROUPCHAT:zxc
+2015-11-13 09:51:59 zxcJOIN:user
+2015-11-13 09:52:02 zxc:user > zxc
+2015-11-13 09:52:02 zxc:user > zcx
+2015-11-13 09:52:02 zxc:user > zcx
+2015-11-13 09:52:03 zxc:user > zcxzx
+2015-11-13 09:52:03 zxc:user > sd
+2015-11-13 09:52:03 zxc:user > ads
+2015-11-13 09:52:05 zxc:user > d
+2015-11-13 10:10:42 GlobalChatRoomJOIN:user
+2015-11-13 10:14:59 GlobalChatRoomJOIN:user
+2015-11-13 10:15:03 NEWGROUPCHAT:zxc
+2015-11-13 10:15:03 zxcJOIN:user
+2015-11-13 10:15:05 zxc:user > asdads
+2015-11-13 10:15:05 zxc:user > as
+2015-11-13 10:15:06 zxc:user > d
+2015-11-13 10:15:06 zxc:user > asd
+2015-11-13 10:15:06 zxc:user > asd
+2015-11-13 10:15:06 zxc:user > ad
+2015-11-13 10:15:06 zxc:user > 
+2015-11-13 10:15:06 zxc:user > 
+2015-11-13 10:15:06 zxc:user > 
+2015-11-13 10:15:07 zxc:user > as
+2015-11-13 10:15:07 zxc:user > d
+2015-11-13 10:15:07 zxc:user > 
+2015-11-13 10:15:10 NEWGROUPCHAT:dtjdt
+2015-11-13 10:15:10 dtjdtJOIN:user
+2015-11-13 10:15:12 dtjdt:user > asd
+2015-11-13 10:15:12 dtjdt:user > asd
+2015-11-13 10:15:12 dtjdt:user > asdas
+2015-11-13 10:15:12 dtjdt:user > asdasd
+2015-11-13 10:15:23 dtjdt:user > xcvx
+2015-11-13 10:15:23 dtjdt:user > cv
+2015-11-13 10:15:23 dtjdt:user > xvc
+2015-11-13 10:15:23 dtjdt:user > 
+2015-11-13 10:15:26 dtjdt:user > asda
+2015-11-13 10:15:26 dtjdt:user > asdasd
+2015-11-13 10:15:26 dtjdt:user > asdasdads
+2015-11-13 10:17:26 GlobalChatRoomJOIN:user
+2015-11-13 10:17:30 NEWGROUPCHAT:srg
+2015-11-13 10:17:30 srgJOIN:user
+2015-11-13 10:17:31 srg:user > srg
+2015-11-13 10:17:32 srg:user > rg
+2015-11-13 10:17:32 srg:user > s
+2015-11-13 10:17:32 srg:user > grg
+2015-11-13 10:17:32 srg:user > srg
+2015-11-13 10:17:32 srg:user > gsr
+2015-11-13 10:17:46 NEWGROUPCHAT:htd
+2015-11-13 10:17:46 htdJOIN:user
+2015-11-13 10:17:48 htd:user > sdf
+2015-11-13 10:17:48 htd:user > sdf
+2015-11-13 10:17:48 htd:user > sdfsdf
+2015-11-13 10:17:48 htd:user > sdfsdfsdf
+2015-11-13 10:17:54 htd:user > sdf
+2015-11-13 10:17:54 htd:user > s
+2015-11-13 10:17:54 htd:user > dfs
+2015-11-13 10:17:54 htd:user > df
+2015-11-13 10:17:54 htd:user > f
+2015-11-13 10:17:54 htd:user > 
+2015-11-13 10:17:57 htd:user > sdf
+2015-11-13 10:17:58 htd:user > sdf
+2015-11-13 10:17:58 htd:user > sdfsf
+2015-11-13 10:17:58 htd:user > sdfsf
+2015-11-13 10:18:02 NEWGROUPCHAT:cxvxcvx
+2015-11-13 10:18:02 cxvxcvxJOIN:user
+2015-11-13 10:18:06 cxvxcvx:user > xc
+2015-11-13 10:18:06 cxvxcvx:user > xcv
+2015-11-13 10:18:06 cxvxcvx:user > xcvxcv
+2015-11-13 10:18:06 cxvxcvx:user > xcvxcvxcv
+2015-11-13 10:18:06 cxvxcvx:user > xcvxcvxcv
+2015-11-13 10:18:07 cxvxcvx:user > xcvxcvxcv
+2015-11-13 10:18:13 cxvxcvx:user > 
+2015-11-13 10:18:13 cxvxcvx:user > xcv
+2015-11-13 10:18:13 cxvxcvx:user > xcvxcv
+2015-11-13 10:18:13 cxvxcvx:user > xcvxcv
+2015-11-13 10:18:13 cxvxcvx:user > xcvxcv
+2015-11-13 10:18:17 cxvxcvx:user > xcv
+2015-11-13 10:18:17 cxvxcvx:user > xcv
+2015-11-13 10:18:17 cxvxcvx:user > 
+2015-11-13 10:18:17 cxvxcvx:user > 
+2015-11-13 10:40:14 GlobalChatRoomJOIN:user
+2015-11-13 10:41:19 GlobalChatRoomJOIN:user
+2015-11-13 10:41:23 NEWGROUPCHAT:cvb
+2015-11-13 10:41:23 cvbJOIN:user
+2015-11-13 10:41:25 cvb:user > xcv
+2015-11-13 10:41:25 cvb:user > sd
+2015-11-13 10:41:25 cvb:user > fs
+2015-11-13 10:41:26 cvb:user > dfs
+2015-11-13 10:41:26 cvb:user > dfs
+2015-11-13 10:41:26 cvb:user > ef
+2015-11-13 10:41:26 cvb:user > sef
+2015-11-13 10:41:26 cvb:user > sef
+2015-11-13 10:41:27 cvb:user > f
+2015-11-13 10:41:27 cvb:user > se
+2015-11-13 10:41:27 cvb:user > efs
+2015-11-13 10:41:27 cvb:user > fse
+2015-11-13 10:41:27 cvb:user > ef
+2015-11-13 10:41:30 NEWGROUPCHAT:qweqwe
+2015-11-13 10:41:30 qweqweJOIN:user
+2015-11-13 10:41:34 qweqwe:user > qweqw
+2015-11-13 10:41:34 qweqwe:user > eq
+2015-11-13 10:41:34 qweqwe:user > we
+2015-11-13 10:41:34 qweqwe:user > qweq
+2015-11-13 10:41:34 qweqwe:user > weqw
+2015-11-13 10:41:35 qweqwe:user > eqwe
+2015-11-13 10:41:35 qweqwe:user > qwe
+2015-11-13 10:41:35 qweqwe:user > qe
+2015-11-13 10:41:35 qweqwe:user > q
+2015-11-13 10:41:35 qweqwe:user > ww
+2015-11-13 10:41:35 qweqwe:user > eqe
+2015-11-13 10:41:38 NEWGROUPCHAT:srgs
+2015-11-13 10:41:38 srgsJOIN:user
+2015-11-13 10:41:40 srgs:user > dfgdfgd
+2015-11-13 10:41:41 srgs:user > gdf
+2015-11-13 10:41:41 srgs:user > d
+2015-11-13 10:41:41 srgs:user > d
+2015-11-13 10:41:41 srgs:user > dfgfg
+2015-11-13 10:41:41 srgs:user > d
+2015-11-13 10:41:42 srgs:user > ff
+2015-11-13 10:41:42 srgs:user > fd
+2015-11-13 10:41:42 srgs:user > gdg
+2015-11-13 10:41:45 srgs:user > 
+2015-11-13 10:41:45 srgs:user > dfg
+2015-11-13 10:41:45 srgs:user > dfgdfg
+2015-11-13 10:41:45 srgs:user > dfgdfgdgf

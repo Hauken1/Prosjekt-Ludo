@@ -2,11 +2,16 @@ package globalServer;
 
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.List;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.Condition;
@@ -37,12 +42,17 @@ public class GlobalServer extends JFrame{
     private final String receiveDiceText;
     private final String turnOwnerText;
     private final String makeMoveText;
+    
+    private final String fileNameEnd = "ChatLog.txt"; //The end of the filename
+    private String fileName; //The whole filename
 	
 	public GlobalServer() {
 		
 		super("GlobalServer");
 		
 		groupChatList.add("GlobalChatRoom");
+		
+		fileName = "GlobalChatRoom" + fileNameEnd; //Placeholder so we can write to a file.
 		
 		outputArea = new JTextArea();
 		outputArea.setFont(new Font("Ariel", Font.PLAIN, 14));
@@ -123,6 +133,7 @@ public class GlobalServer extends JFrame{
 							Player p = i.next();
 							try {
 								p.sendText(message);
+								writeToFile(fileName, message);
 							} catch (IOException ioe) {
 								i.remove();
 								messages.add("LOGOUT:" + p.returnName());
@@ -148,6 +159,7 @@ public class GlobalServer extends JFrame{
 						
 						for (int i=0; i<groupChatList.size(); i++) {
 							p.sendText(groupChatList.get(i)+ "JOIN:" + p.returnName());
+							writeToFile(fileName, groupChatList.get(i)+ "JOIN:" + p.returnName());
 						}
 						synchronized (player) {
 							player.add(p);
@@ -157,6 +169,7 @@ public class GlobalServer extends JFrame{
 								if (p != p1)
 									for (int y=0; y<groupChatList.size(); y++) {
 										p.sendText("NEWGROUPCHAT:" + groupChatList.get(y));
+										writeToFile(fileName, "NEWGROUPCHAT:" + groupChatList.get(y));
 									}
 									/*try {
 									p.sendText("GlobalChatRoomJOIN:" + p1.returnName());
@@ -186,6 +199,7 @@ public class GlobalServer extends JFrame{
 			if(groupChatList.contains(msg.substring(13)))
 				try {
 					p.sendText("ERRORCHAT");
+					writeToFile(fileName, "ERRORCHAT");
 				} catch (IOException ioe) {
 					ioe.printStackTrace();
 				}
@@ -263,4 +277,19 @@ public class GlobalServer extends JFrame{
 		SwingUtilities.invokeLater(() -> outputArea.append(text));
 	}
 	
+	private void writeToFile(String fileName, String data) {
+		PrintWriter writer = null;
+		String timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime());
+		try {
+			writer = new PrintWriter(new BufferedWriter(new FileWriter(fileName, true)));
+			writer.println(timeStamp + " " + data);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if (writer != null) {
+				writer.close();
+			}
+		}
+	}
 }
